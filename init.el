@@ -147,6 +147,23 @@
     (setq anzu-cons-mode-line-p nil)
     (global-anzu-mode)))
 
+(use-package flatui-theme
+  :disabled t
+  :ensure t
+  :defer t
+  :config
+  (setup-flat-ui))
+
+(use-package dracula-theme
+  :ensure t
+  :defer t)
+
+(use-package spacemacs-theme
+  :ensure t
+  :defer t
+  :init
+  (load-theme 'spacemacs-dark))
+
 (use-package spaceline
   :ensure t
   :init
@@ -161,21 +178,6 @@
     (setq powerline-height 25)
     (setq powerline-text-scale-factor 1.0)
     (spaceline-compile)))
-
-(use-package flatui-theme
-  :disabled t
-  :ensure t
-  :config
-  (setup-flat-ui))
-
-(use-package dracula-theme
-  :ensure t)
-
-(use-package spacemacs-theme
-  :ensure t
-  :defer t
-  :config
-  (load-theme 'spacemacs-dark))
 
 (use-package git-gutter
   :ensure t
@@ -495,3 +497,17 @@
   (fci-mode))
 
 ;;; init.el ends here
+(custom-set-variables
+ ;; custom-set-variables was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ '(custom-safe-themes
+   (quote
+    ("bffa9739ce0752a37d9b1eee78fc00ba159748f50dc328af4be661484848e476" default))))
+(custom-set-faces
+ ;; custom-set-faces was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ )
