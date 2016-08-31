@@ -348,7 +348,9 @@
   :ensure t
   :bind (("C-:" . avy-move-region)
 	 ("C-'" . avy-goto-char-timer))
-  :config (avy-setup-default))
+  :config
+  (setq avy-background t)
+  (avy-setup-default))
 
 (use-package ace-window
   :ensure t
