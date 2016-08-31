@@ -276,6 +276,12 @@
     (eval-after-load 'company '(add-to-list 'company-backends 'company-irony))
     (add-hook 'irony-mode-hook 'company-irony-setup-begin-commands)))
 
+(use-package flycheck-irony
+  :ensure t
+  :config
+  (eval-after-load 'flycheck
+      '(add-hook 'flycheck-mode-hook #'flycheck-irony-setup)))
+
 (use-package company-c-headers
   :ensure t
   :config
@@ -302,6 +308,15 @@
   :mode (("\\.js\\'" . js2-mode) ("\\.jsx?\\'" . js2-jsx-mode))
   :config
   (add-hook 'js2-jsx-mode-hook (setq-local sgml-basic-offset js2-basic-offset)))
+
+(use-package company-flow
+  :ensure t
+  :config
+  (eval-after-load 'company
+    '(add-to-list 'company-backends 'company-flow)))
+
+(use-package flycheck-flow
+  :ensure t)
 
 (use-package json-mode
   :ensure t)
@@ -504,7 +519,11 @@
  ;; If there is more than one, they won't work right.
  '(custom-safe-themes
    (quote
-    ("bffa9739ce0752a37d9b1eee78fc00ba159748f50dc328af4be661484848e476" default))))
+    ("bffa9739ce0752a37d9b1eee78fc00ba159748f50dc328af4be661484848e476" default)))
+ '(package-selected-packages
+   (quote
+    (flycheck-flow flycheck-irony company-flow yaml-mode window-numbering which-key web-mode use-package terraform-mode spacemacs-theme spaceline smooth-scrolling selectric-mode restclient rainbow-mode projectile paradox multiple-cursors move-text markdown-mode magit json-mode js2-mode iedit hungry-delete guru-mode google-c-style golden-ratio git-gutter flycheck-protobuf flycheck flx-ido expand-region exec-path-from-shell eslint-fix ensime editorconfig dracula-theme company-irony company-go company-c-headers company-anaconda clang-format anzu ace-window)))
+ '(paradox-github-token t))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
