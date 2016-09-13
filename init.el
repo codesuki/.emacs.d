@@ -54,7 +54,7 @@
 
 (defun disable-bell ()
   (setq ring-bell-function 'ignore
-	visible-bell nil))
+        visible-bell nil))
 
 (defconst auto-save-path (expand-file-name "~/.emacs.d/auto-save/"))
 
@@ -62,6 +62,7 @@
   (progn
     (prefer-coding-system 'utf-8)
     (setq-default fill-column 80)
+    (setq-default indent-tabs-mode nil)
     (setq save-interprogram-paste-before-kill t)
     (setq-default sentence-end-double-space nil)
     (setq column-number-mode t)
@@ -72,9 +73,9 @@
     (unless (file-exists-p auto-save-path)
       (make-directory auto-save-path t))
     (setq auto-save-file-name-transforms
-	  `((".*" ,auto-save-path t)))
+          `((".*" ,auto-save-path t)))
     (setq minibuffer-prompt-properties
-	  '(read-only t point-entered minibuffer-avoid-prompt face minibuffer-prompt))))
+          '(read-only t point-entered minibuffer-avoid-prompt face minibuffer-prompt))))
 
 (defun init ()
   (disable-ui)
@@ -106,7 +107,8 @@
 
 (use-package paren
   :config
-  (show-paren-mode))
+  (show-paren-mode)
+  (setq show-paren-delay 0))
 
 (use-package cua-base
   :config
@@ -135,6 +137,8 @@
   (progn
     (setq mouse-wheel-progressive-speed nil)
     (setq mouse-wheel-scroll-amount '(2 ((shift) . 1) ((control) . nil)))))
+
+(use-package dired-x)
 
 (use-package paradox
   :ensure t)
@@ -303,11 +307,22 @@
   :config
   (setq js-indent-level 2))
 
+(defun set-jsx-indentation ()
+  (setq-local sgml-basic-offset js2-basic-offset))
+
 (use-package js2-mode
   :ensure t
-  :mode (("\\.js\\'" . js2-mode) ("\\.jsx?\\'" . js2-jsx-mode))
   :config
-  (add-hook 'js2-jsx-mode-hook (setq-local sgml-basic-offset js2-basic-offset)))
+  (progn
+    (add-to-list 'auto-mode-alist '("\\.js\\'" . js2-mode))
+    (add-to-list 'auto-mode-alist '("\\.jsx\\'" . js2-jsx-mode))
+    (add-hook 'js2-jsx-mode-hook #'set-jsx-indentation)))
+
+(use-package add-node-modules-path
+  :load-path "add-node-modules-path/"
+  :config
+  (eval-after-load 'js2-mode
+    '(add-hook 'js2-mode-hook #'add-node-modules-path)))
 
 (use-package company-flow
   :ensure t
@@ -325,7 +340,7 @@
   :ensure t
   :config
   (eval-after-load 'js2-mode
-    '(add-hook 'js2-mode-hook (lambda () (add-hook 'after-save-hook 'eslint-fix)))))
+    '(add-hook 'js2-mode-hook (lambda () (add-hook 'after-save-hook 'eslint-fix nil t)))))
 
 (use-package web-mode
   :ensure t
@@ -364,7 +379,7 @@
 (use-package avy
   :ensure t
   :bind (("C-:" . avy-move-region)
-	 ("C-'" . avy-goto-char-timer))
+         ("C-'" . avy-goto-char-timer))
   :config
   (setq avy-background t)
   (avy-setup-default))
@@ -432,14 +447,14 @@
     (setq window-combination-resize t)
     (setq golden-ratio-auto-scale t)
     (setq golden-ratio-extra-commands
-	  (append golden-ratio-extra-commands
-		  '(ace-window
-		    ace-delete-window
-		    ace-select-window
-		    ace-swap-window
-		    ace-maximize-window
-		    avy-pop-mark
-		    avy-goto-char-timer)))))
+          (append golden-ratio-extra-commands
+                  '(ace-window
+                    ace-delete-window
+                    ace-select-window
+                    ace-swap-window
+                    ace-maximize-window
+                    avy-pop-mark
+                    avy-goto-char-timer)))))
 
 (use-package smooth-scrolling
   :ensure t
@@ -447,6 +462,7 @@
   (smooth-scrolling-mode))
 
 (use-package selectric-mode
+  :load-path "selectric-mode/"
   :ensure t
   :diminish (selectric-mode . "♬")
   :config
@@ -493,10 +509,10 @@
   (progn
     (global-centered-cursor-mode)
     (setq ccm-recenter-at-end-of-file t
-	  ccm-ignored-commands '(mouse-drag-region
-				 mouse-set-point
-				 widget-button-click
-				 scroll-bar-toolkit-scroll))))
+          ccm-ignored-commands '(mouse-drag-region
+                                 mouse-set-point
+                                 widget-button-click
+                                 scroll-bar-toolkit-scroll))))
 
 (use-package diff-hl
   :disabled t
