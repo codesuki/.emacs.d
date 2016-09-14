@@ -140,6 +140,9 @@
 
 (use-package dired-x)
 
+(use-package abbrev
+  :diminish)
+
 (use-package paradox
   :ensure t)
 
@@ -278,6 +281,12 @@
 (use-package sbt-mode
   :ensure t)
 
+(defun setup-c-clang-options ()
+  (setq irony-additional-clang-options (quote ("-std=c11"))))
+
+(defun setup-cpp-clang-options ()
+  (setq irony-additional-clang-options (quote ("-std=c++14" "-stdlib=libc++"))))
+
 (use-package irony
   :ensure t
   :init
@@ -287,7 +296,8 @@
     (add-hook 'objc-mode-hook 'irony-mode))
   :config
   (progn
-    (setq irony-additional-clang-options (quote ("-std=c++11" "-stdlib=libc++")))))
+    (add-hook 'c++-mode-hook 'setup-cpp-clang-options)
+    (add-hook 'c-mode-hook 'setup-c-clang-options)))
 
 (use-package company-irony
   :ensure t
@@ -309,7 +319,11 @@
 
 (use-package clang-format
   :ensure t
-  :defer t)
+  :config
+  (progn
+    (setq clang-format-style "llvm")
+    (add-hook 'c++-mode-hook (lambda () (add-hook 'before-save-hook 'clang-format-buffer nil t)))
+    (add-hook 'c-mode-hook (lambda () (add-hook 'before-save-hook 'clang-format-buffer nil t)))))
 
 (use-package google-c-style
   :ensure t
