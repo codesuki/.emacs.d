@@ -235,6 +235,12 @@
     (setq gofmt-command "goimports")
     (add-hook 'before-save-hook #'gofmt-before-save)))
 
+(use-package flycheck-gometalinter
+  :ensure t
+  :config
+  (progn
+    (flycheck-gometalinter-setup)))
+
 (use-package go-eldoc
   :ensure t
   :config
@@ -568,7 +574,7 @@
     ("bffa9739ce0752a37d9b1eee78fc00ba159748f50dc328af4be661484848e476" default)))
  '(package-selected-packages
    (quote
-    (go-add-tags go-eldoc nasm-mode flycheck-flow flycheck-irony company-flow yaml-mode window-numbering which-key web-mode use-package terraform-mode spacemacs-theme spaceline smooth-scrolling selectric-mode restclient rainbow-mode projectile paradox multiple-cursors move-text markdown-mode magit json-mode js2-mode iedit hungry-delete guru-mode google-c-style golden-ratio git-gutter flycheck-protobuf flycheck flx-ido expand-region exec-path-from-shell eslint-fix ensime editorconfig dracula-theme company-irony company-go company-c-headers company-anaconda clang-format anzu ace-window)))
+    (flycheck-gometalinter go-add-tags go-eldoc nasm-mode flycheck-flow flycheck-irony company-flow yaml-mode window-numbering which-key web-mode use-package terraform-mode spacemacs-theme spaceline smooth-scrolling selectric-mode restclient rainbow-mode projectile paradox multiple-cursors move-text markdown-mode magit json-mode js2-mode iedit hungry-delete guru-mode google-c-style golden-ratio git-gutter flycheck-protobuf flycheck flx-ido expand-region exec-path-from-shell eslint-fix ensime editorconfig dracula-theme company-irony company-go company-c-headers company-anaconda clang-format anzu ace-window)))
  '(paradox-github-token t))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
