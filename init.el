@@ -112,7 +112,8 @@
 
 (use-package cua-base
   :config
-  (cua-mode))
+  (cua-mode)
+  (setq cua-enable-cua-keys nil))
 
 (use-package delsel
   :config
@@ -251,6 +252,9 @@
   :config
   (with-eval-after-load 'go-mode
     (define-key go-mode-map (kbd "C-c t") #'go-add-tags)))
+
+(use-package gotest
+  :ensure t)
 
 (use-package company-go
   :ensure t
@@ -498,6 +502,7 @@
   (smooth-scrolling-mode))
 
 (use-package selectric-mode
+  :disabled t
   :load-path "selectric-mode/"
   :ensure t
   :diminish (selectric-mode . "♬")
@@ -574,7 +579,7 @@
     ("bffa9739ce0752a37d9b1eee78fc00ba159748f50dc328af4be661484848e476" default)))
  '(package-selected-packages
    (quote
-    (flycheck-gometalinter go-add-tags go-eldoc nasm-mode flycheck-flow flycheck-irony company-flow yaml-mode window-numbering which-key web-mode use-package terraform-mode spacemacs-theme spaceline smooth-scrolling selectric-mode restclient rainbow-mode projectile paradox multiple-cursors move-text markdown-mode magit json-mode js2-mode iedit hungry-delete guru-mode google-c-style golden-ratio git-gutter flycheck-protobuf flycheck flx-ido expand-region exec-path-from-shell eslint-fix ensime editorconfig dracula-theme company-irony company-go company-c-headers company-anaconda clang-format anzu ace-window)))
+    (gotest flycheck-gometalinter go-add-tags go-eldoc nasm-mode flycheck-flow flycheck-irony company-flow yaml-mode window-numbering which-key web-mode use-package terraform-mode spacemacs-theme spaceline smooth-scrolling selectric-mode restclient rainbow-mode projectile paradox multiple-cursors move-text markdown-mode magit json-mode js2-mode iedit hungry-delete guru-mode google-c-style golden-ratio git-gutter flycheck-protobuf flycheck flx-ido expand-region exec-path-from-shell eslint-fix ensime editorconfig dracula-theme company-irony company-go company-c-headers company-anaconda clang-format anzu ace-window)))
  '(paradox-github-token t))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
