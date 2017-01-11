@@ -6,6 +6,7 @@
 (require 'package)
 (package-initialize)
 (add-to-list 'package-archives '("melpa" . "http://melpa.org/packages/"))
+(add-to-list 'package-archives '("melpa-stable" . "http://stable.melpa.org/packages/"))
 
 (defun add-to-load-path (dir) (add-to-list 'load-path dir))
 
@@ -290,8 +291,10 @@
 
 (use-package ensime
   :ensure t
+  :pin melpa-stable
   :init
-  (setq ensime-startup-snapshot-notification nil))
+  (setq ensime-startup-snapshot-notification nil)
+  (setq ensime-startup-notification nil))
 
 (use-package sbt-mode
   :ensure t)
@@ -459,6 +462,7 @@
 
 (use-package editorconfig
   :ensure t
+  :diminish (editorconfig-mode . " ⓔ")
   :config
   (editorconfig-mode))
 
@@ -584,7 +588,7 @@
     ("bffa9739ce0752a37d9b1eee78fc00ba159748f50dc328af4be661484848e476" default)))
  '(package-selected-packages
    (quote
-    (dockerfile-mode add-node-modules-path gotest flycheck-gometalinter go-add-tags go-eldoc nasm-mode flycheck-flow flycheck-irony company-flow yaml-mode window-numbering which-key web-mode use-package terraform-mode spacemacs-theme spaceline smooth-scrolling selectric-mode restclient rainbow-mode projectile paradox multiple-cursors move-text markdown-mode magit json-mode js2-mode iedit hungry-delete guru-mode google-c-style golden-ratio git-gutter flycheck-protobuf flycheck flx-ido expand-region exec-path-from-shell eslint-fix ensime editorconfig dracula-theme company-irony company-go company-c-headers company-anaconda clang-format anzu ace-window)))
+    (ensime dockerfile-mode add-node-modules-path gotest flycheck-gometalinter go-add-tags go-eldoc nasm-mode flycheck-flow flycheck-irony company-flow yaml-mode window-numbering which-key web-mode use-package terraform-mode spacemacs-theme spaceline smooth-scrolling selectric-mode restclient rainbow-mode projectile paradox multiple-cursors move-text markdown-mode magit json-mode js2-mode iedit hungry-delete guru-mode google-c-style golden-ratio git-gutter flycheck-protobuf flycheck flx-ido expand-region exec-path-from-shell eslint-fix editorconfig dracula-theme company-irony company-go company-c-headers company-anaconda clang-format anzu ace-window)))
  '(paradox-github-token t))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
