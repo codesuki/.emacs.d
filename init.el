@@ -364,7 +364,9 @@
   (progn
     (add-to-list 'auto-mode-alist '("\\.js\\'" . js2-mode))
     (add-to-list 'auto-mode-alist '("\\.jsx\\'" . js2-jsx-mode))
-    (add-hook 'js2-jsx-mode-hook #'set-jsx-indentation)))
+    (add-hook 'js2-jsx-mode-hook #'set-jsx-indentation)
+    (setq js2-mode-show-strict-warnings nil)
+    (setq js2-mode-show-parse-errors nil)))
 
 (use-package add-node-modules-path
   :load-path "add-node-modules-path/"
