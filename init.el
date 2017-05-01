@@ -1,3 +1,25 @@
+(custom-set-variables
+ ;; custom-set-variables was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ '(ansi-color-names-vector
+   ["#0a0814" "#f2241f" "#67b11d" "#b1951d" "#4f97d7" "#a31db1" "#28def0" "#b2b2b2"])
+ '(custom-safe-themes
+   (quote
+    ("d9129a8d924c4254607b5ded46350d68cc00b6e38c39fc137c3cfb7506702c12" "fa2b58bb98b62c3b8cf3b6f02f058ef7827a8e497125de0254f56e373abee088" "bffa9739ce0752a37d9b1eee78fc00ba159748f50dc328af4be661484848e476" default)))
+ '(flycheck-javascript-flow-args nil)
+ '(package-selected-packages
+   (quote
+    (protobuf-mode groovy-mode ensime dockerfile-mode add-node-modules-path gotest flycheck-gometalinter go-add-tags go-eldoc nasm-mode flycheck-flow flycheck-irony company-flow yaml-mode window-numbering which-key web-mode use-package terraform-mode spacemacs-theme spaceline smooth-scrolling selectric-mode restclient rainbow-mode projectile paradox multiple-cursors move-text markdown-mode magit json-mode js2-mode iedit hungry-delete guru-mode google-c-style golden-ratio git-gutter flycheck-protobuf flycheck flx-ido expand-region exec-path-from-shell eslint-fix editorconfig dracula-theme company-irony company-go company-c-headers company-anaconda clang-format anzu ace-window)))
+ '(paradox-github-token t))
+(custom-set-faces
+ ;; custom-set-faces was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ )
+
 ;;; init.el --- My Config
 
 ;;; Commentary:
@@ -271,7 +293,9 @@
   :ensure t)
 
 (use-package flycheck-protobuf
-  :ensure t)
+  :ensure t
+  :config
+  (add-to-list 'flycheck-checkers 'protobuf-protoc-reporter t))
 
 (use-package anaconda-mode
   :ensure t
@@ -294,7 +318,9 @@
   :pin melpa-stable
   :init
   (setq ensime-startup-snapshot-notification nil)
-  (setq ensime-startup-notification nil))
+  (setq ensime-startup-notification nil)
+  (eval-after-load "ensime-mode"
+    '(define-key ensime-mode-map (kbd "M-p") nil)))
 
 (use-package sbt-mode
   :ensure t)
@@ -580,21 +606,3 @@
   (fci-mode))
 
 ;;; init.el ends here
-(custom-set-variables
- ;; custom-set-variables was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- '(custom-safe-themes
-   (quote
-    ("bffa9739ce0752a37d9b1eee78fc00ba159748f50dc328af4be661484848e476" default)))
- '(package-selected-packages
-   (quote
-    (ensime dockerfile-mode add-node-modules-path gotest flycheck-gometalinter go-add-tags go-eldoc nasm-mode flycheck-flow flycheck-irony company-flow yaml-mode window-numbering which-key web-mode use-package terraform-mode spacemacs-theme spaceline smooth-scrolling selectric-mode restclient rainbow-mode projectile paradox multiple-cursors move-text markdown-mode magit json-mode js2-mode iedit hungry-delete guru-mode google-c-style golden-ratio git-gutter flycheck-protobuf flycheck flx-ido expand-region exec-path-from-shell eslint-fix editorconfig dracula-theme company-irony company-go company-c-headers company-anaconda clang-format anzu ace-window)))
- '(paradox-github-token t))
-(custom-set-faces
- ;; custom-set-faces was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- )
