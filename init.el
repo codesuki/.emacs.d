@@ -162,11 +162,19 @@
 
 (use-package dired-x)
 
+(use-package ibuffer
+  :config
+  (progn
+    (defalias 'list-buffers 'ibuffer)))
+
 (use-package abbrev
   :diminish)
 
 (use-package paradox
-  :ensure t)
+  :ensure t
+  :config
+  (progn
+    (paradox-enable)))
 
 (use-package anzu
   :ensure t
