@@ -267,7 +267,8 @@
   :ensure t
   :diminish (company-mode . " ⓐ")
   :config
-  (global-company-mode))
+  (global-company-mode)
+  (setq company-dabbrev-downcase nil))
 
 (use-package go-mode
   :ensure t
