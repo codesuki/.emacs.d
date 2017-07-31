@@ -413,17 +413,32 @@
 (use-package add-node-modules-path
   :load-path "add-node-modules-path/"
   :config
-  (eval-after-load 'js2-mode
-    '(add-hook 'js2-mode-hook #'add-node-modules-path)))
+  (progn
+    (eval-after-load 'js2-mode
+      '(add-hook 'js2-mode-hook #'add-node-modules-path))
+    (eval-after-load 'web-mode
+      '(add-hook 'web-mode-hook #'add-node-modules-path))
+    (eval-after-load 'typescript-mode
+      '(add-hook 'typescript-mode-hook #'add-node-modules-path))))
 
-(use-package company-flow
-  :ensure t
-  :config
-  (eval-after-load 'company
-    '(add-to-list 'company-backends 'company-flow)))
-
-(use-package flycheck-flow
+(use-package typescript-mode
   :ensure t)
+
+(use-package tide
+  :ensure t
+  :diminish tide-mode
+  :config
+  (progn
+    (add-hook 'tide-mode-hook (lambda () (add-hook 'before-save-hook #'tide-format-before-save nil t)))
+    (add-hook 'typescript-mode-hook #'tide-setup)
+    (add-hook 'web-mode-hook
+              (lambda ()
+                (when (string-equal "tsx" (file-name-extension buffer-file-name))
+                  (progn
+                    (tide-setup)
+                    (eldoc-mode)
+                    (flycheck-add-mode 'typescript-tslint 'web-mode)
+                    (flycheck-add-mode 'typescript-tide 'web-mode)))))))
 
 (use-package json-mode
   :ensure t)
@@ -436,7 +451,11 @@
 
 (use-package web-mode
   :ensure t
-  :mode ("\\.html?\\'" . web-mode))
+  ;:mode ("\\.html?\\'" . web-mode)
+  :config
+  (progn
+    (add-to-list 'auto-mode-alist '("\\.html?\\'" . web-mode))
+    (add-to-list 'auto-mode-alist '("\\.tsx\\'" . web-mode))))
 
 (use-package markdown-mode
   :ensure t)
