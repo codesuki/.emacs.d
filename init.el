@@ -462,6 +462,12 @@
     (add-to-list 'auto-mode-alist '("\\.html?\\'" . web-mode))
     (add-to-list 'auto-mode-alist '("\\.tsx\\'" . web-mode))))
 
+(use-package emmet-mode
+  :ensure t
+  :config
+  (add-hook 'web-mode-hook 'emmet-mode)
+  (add-hook 'css-mode-hook 'emmet-mode))
+
 (use-package markdown-mode
   :ensure t)
 
