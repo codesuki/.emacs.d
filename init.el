@@ -278,6 +278,11 @@
     (setq gofmt-command "goimports")
     (add-hook 'before-save-hook #'gofmt-before-save)))
 
+(use-package go-guru
+  :ensure t
+  :config
+  (add-hook 'go-mode-hook #'go-guru-hl-identifier-mode))
+
 (use-package flycheck-gometalinter
   :ensure t
   :config
