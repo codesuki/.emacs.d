@@ -235,6 +235,11 @@
     (exec-path-from-shell-copy-env "GOPATH")
     (exec-path-from-shell-copy-env "PATH")))
 
+(use-package undo-tree
+  :ensure t
+  :diminish undo-tree-mode
+  :config
+  (progn(global-undo-tree-mode)))
 (use-package yasnippet
   :ensure t
   :defer t
