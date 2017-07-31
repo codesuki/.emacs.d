@@ -495,9 +495,6 @@
   :ensure t
   :bind ("C-;" . iedit-mode))
 
-(use-package multiple-cursors
-  :ensure t)
-
 (use-package avy
   :ensure t
   :bind (("C-:" . avy-move-region)
