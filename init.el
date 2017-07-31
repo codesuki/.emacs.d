@@ -545,6 +545,13 @@
     (setq ido-enable-flex-matching t)
     (setq ido-use-faces nil)))
 
+(use-package smex
+  :ensure t
+  :config
+  (progn
+    (smex-initialize)
+    (global-set-key (kbd "M-x") 'smex)))
+
 (use-package restclient
   :ensure t)
 
