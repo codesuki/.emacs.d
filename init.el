@@ -240,6 +240,10 @@
   :diminish undo-tree-mode
   :config
   (progn(global-undo-tree-mode)))
+
+(use-package smartparens
+  :ensure t)
+
 (use-package yasnippet
   :ensure t
   :defer t
