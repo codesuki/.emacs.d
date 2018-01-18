@@ -11,7 +11,7 @@
  '(flycheck-javascript-flow-args nil)
  '(package-selected-packages
    (quote
-    (protobuf-mode groovy-mode ensime dockerfile-mode add-node-modules-path gotest flycheck-gometalinter go-add-tags go-eldoc nasm-mode flycheck-flow flycheck-irony company-flow yaml-mode window-numbering which-key web-mode use-package terraform-mode spacemacs-theme spaceline smooth-scrolling selectric-mode restclient rainbow-mode projectile paradox multiple-cursors move-text markdown-mode magit json-mode js2-mode iedit hungry-delete guru-mode google-c-style golden-ratio git-gutter flycheck-protobuf flycheck flx-ido expand-region exec-path-from-shell eslint-fix editorconfig dracula-theme company-irony company-go company-c-headers company-anaconda clang-format anzu ace-window)))
+    (flycheck-package smartparens smex emmet-mode tide typescript-mode expand-region go-impl go-guru protobuf-mode groovy-mode ensime dockerfile-mode add-node-modules-path gotest flycheck-gometalinter go-add-tags go-eldoc nasm-mode flycheck-irony yaml-mode window-numbering which-key web-mode use-package terraform-mode spacemacs-theme spaceline smooth-scrolling selectric-mode restclient rainbow-mode projectile paradox move-text markdown-mode magit json-mode js2-mode iedit hungry-delete guru-mode google-c-style golden-ratio git-gutter flycheck-protobuf flycheck flx-ido exec-path-from-shell eslint-fix editorconfig dracula-theme company-irony company-go company-c-headers company-anaconda clang-format anzu ace-window)))
  '(paradox-github-token t))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
@@ -113,6 +113,9 @@
   (disable-bell)
   (add-hook 'after-init-hook 'setup-modeline-font t nil))
 
+(defun my-recentf-cleanup ()
+  (setq recentf-list '()))
+
 (setq gc-cons-threshold 100000000)
 
 (init)
@@ -144,7 +147,8 @@
   :config
   (progn
     (ido-mode)
-    (ido-everywhere)))
+    (ido-everywhere)
+    (setq ido-use-virtual-buffers t)))
 
 (use-package autorevert
   :diminish auto-revert-mode)
@@ -169,6 +173,10 @@
 
 (use-package abbrev
   :diminish)
+
+(use-package recentf
+  :config
+  (recentf-mode))
 
 (use-package paradox
   :ensure t
@@ -226,7 +234,12 @@
 
 (use-package projectile
   :ensure t
-  :defer 2)
+  :defer 2
+  :config
+  (projectile-mode)
+  (setq projectile-mode-line
+         '(:eval (format " Projectile[%s]"
+                        (projectile-project-name)))))
 
 (use-package exec-path-from-shell
   :ensure t
@@ -234,12 +247,6 @@
   (progn
     (exec-path-from-shell-copy-env "GOPATH")
     (exec-path-from-shell-copy-env "PATH")))
-
-(use-package undo-tree
-  :ensure t
-  :diminish undo-tree-mode
-  :config
-  (progn(global-undo-tree-mode)))
 
 (use-package smartparens
   :ensure t)
@@ -254,6 +261,11 @@
   :diminish (flycheck-mode . " ⓢ")
   :config
   (global-flycheck-mode))
+
+(use-package flycheck-package
+  :ensure t
+  :config
+  (flycheck-package-setup))
 
 (use-package dockerfile-mode
   :ensure t)
@@ -270,13 +282,20 @@
   (global-company-mode)
   (setq company-dabbrev-downcase nil))
 
+(use-package bazel-mode
+  :load-path "bazel-mode/"
+  :config
+  (progn
+    (add-hook 'bazel-mode-hook (lambda () (add-hook 'before-save-hook #'bazel-format nil t)))))
+
 (use-package go-mode
   :ensure t
   :defer t
   :config
   (progn
     (setq gofmt-command "goimports")
-    (add-hook 'before-save-hook #'gofmt-before-save)))
+    (add-hook 'before-save-hook #'gofmt-before-save)
+    (add-hook 'go-mode-hook (lambda () (local-set-key (kbd "M-.") #'godef-jump)))))
 
 (use-package go-guru
   :ensure t
@@ -452,7 +471,7 @@
   :ensure t
   :config
   (eval-after-load 'js2-mode
-    '(add-hook 'js2-mode-hook (lambda () (add-hook 'after-save-hook 'eslint-fix nil t)))))
+    '(add-hook 'js2-mode-hook '(add-hook 'before-save-hook 'eslint-fix nil t))))
 
 (use-package web-mode
   :ensure t
@@ -498,7 +517,8 @@
 (use-package avy
   :ensure t
   :bind (("C-:" . avy-move-region)
-         ("C-'" . avy-goto-char-timer))
+         ("C-'" . avy-goto-char-timer)
+         ("M-g g" . avy-goto-line))
   :config
   (setq avy-background t)
   (avy-setup-default))
