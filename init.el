@@ -6,12 +6,10 @@
  '(ansi-color-names-vector
    ["#0a0814" "#f2241f" "#67b11d" "#b1951d" "#4f97d7" "#a31db1" "#28def0" "#b2b2b2"])
  '(custom-safe-themes
-   (quote
-    ("d9129a8d924c4254607b5ded46350d68cc00b6e38c39fc137c3cfb7506702c12" "fa2b58bb98b62c3b8cf3b6f02f058ef7827a8e497125de0254f56e373abee088" "bffa9739ce0752a37d9b1eee78fc00ba159748f50dc328af4be661484848e476" default)))
+   '("d9129a8d924c4254607b5ded46350d68cc00b6e38c39fc137c3cfb7506702c12" "fa2b58bb98b62c3b8cf3b6f02f058ef7827a8e497125de0254f56e373abee088" "bffa9739ce0752a37d9b1eee78fc00ba159748f50dc328af4be661484848e476" default))
  '(flycheck-javascript-flow-args nil)
  '(package-selected-packages
-   (quote
-    (flycheck-package smartparens smex emmet-mode tide typescript-mode expand-region go-impl go-guru protobuf-mode groovy-mode ensime dockerfile-mode add-node-modules-path gotest flycheck-gometalinter go-add-tags go-eldoc nasm-mode flycheck-irony yaml-mode window-numbering which-key web-mode use-package terraform-mode spacemacs-theme spaceline smooth-scrolling selectric-mode restclient rainbow-mode projectile paradox move-text markdown-mode magit json-mode js2-mode iedit hungry-delete guru-mode google-c-style golden-ratio git-gutter flycheck-protobuf flycheck flx-ido exec-path-from-shell eslint-fix editorconfig dracula-theme company-irony company-go company-c-headers company-anaconda clang-format anzu ace-window)))
+   '(bazel-mode avy irony anaconda-mode go-mode company yasnippet flycheck-package smartparens smex emmet-mode tide typescript-mode expand-region go-impl go-guru protobuf-mode groovy-mode ensime dockerfile-mode add-node-modules-path gotest flycheck-gometalinter go-add-tags go-eldoc nasm-mode flycheck-irony yaml-mode window-numbering which-key web-mode use-package terraform-mode spacemacs-theme spaceline smooth-scrolling selectric-mode restclient rainbow-mode projectile paradox move-text markdown-mode magit json-mode js2-mode iedit hungry-delete guru-mode google-c-style golden-ratio git-gutter flycheck-protobuf flycheck flx-ido exec-path-from-shell eslint-fix editorconfig dracula-theme company-irony company-go company-c-headers company-anaconda clang-format anzu ace-window))
  '(paradox-github-token t))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
@@ -26,13 +24,14 @@
 
 ;;; Code:
 (require 'package)
+(add-to-list 'package-archives '("melpa" . "http://melpa.org/packages/"))
+(add-to-list 'package-archives '("melpa-stable" . "http://stable.melpa.org/packages/"))
 (package-initialize)
+
 (unless (package-installed-p 'use-package)
   (package-refresh-contents)
   (package-install 'use-package))
 (eval-when-compile (require 'use-package))
-(add-to-list 'package-archives '("melpa" . "http://melpa.org/packages/"))
-(add-to-list 'package-archives '("melpa-stable" . "http://stable.melpa.org/packages/"))
 
 (defun add-to-load-path (dir) (add-to-list 'load-path dir))
 
@@ -66,7 +65,8 @@
    ))
 
 (defun setup-font ()
-  (set-frame-font "InputCustomSansCompressed-14" nil t))
+  (set-frame-font "InputCustomSansCompressed-14" nil t)
+  (setq default-frame-alist '((font . "InputCustomSansCompressed-14"))))
 
 (defun setup-modeline-font ()
   (set-face-attribute 'mode-line-inactive nil :family "InputCustomMonoCompressed")
@@ -283,7 +283,7 @@
   (setq company-dabbrev-downcase nil))
 
 (use-package bazel-mode
-  :load-path "bazel-mode/"
+  :ensure
   :config
   (progn
     (add-hook 'bazel-mode-hook (lambda () (add-hook 'before-save-hook #'bazel-format nil t)))))
@@ -331,11 +331,6 @@
 
 (use-package protobuf-mode
   :ensure t)
-
-(use-package flycheck-protobuf
-  :ensure t
-  :config
-  (add-to-list 'flycheck-checkers 'protobuf-protoc-reporter t))
 
 (use-package anaconda-mode
   :ensure t
@@ -435,7 +430,7 @@
     (setq js2-mode-show-parse-errors nil)))
 
 (use-package add-node-modules-path
-  :load-path "add-node-modules-path/"
+  :ensure
   :config
   (progn
     (eval-after-load 'js2-mode
