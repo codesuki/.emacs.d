@@ -212,7 +212,6 @@
 (use-package spaceline
   :ensure t
   :init
-  (setq ns-use-srgb-colorspace nil)
   :config
   (progn
     (require 'spaceline-config)
@@ -222,6 +221,7 @@
     (setq spaceline-window-numbers-unicode t)
     (setq powerline-height 25)
     (setq powerline-text-scale-factor 1.0)
+    (setq powerline-image-apple-rgb t)
     (spaceline-compile)))
 
 (use-package git-gutter
