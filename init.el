@@ -1,31 +1,19 @@
-(custom-set-variables
- ;; custom-set-variables was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- '(ansi-color-names-vector
-   ["#0a0814" "#f2241f" "#67b11d" "#b1951d" "#4f97d7" "#a31db1" "#28def0" "#b2b2b2"])
- '(custom-safe-themes
-   '("d9129a8d924c4254607b5ded46350d68cc00b6e38c39fc137c3cfb7506702c12" "fa2b58bb98b62c3b8cf3b6f02f058ef7827a8e497125de0254f56e373abee088" "bffa9739ce0752a37d9b1eee78fc00ba159748f50dc328af4be661484848e476" default))
- '(flycheck-javascript-flow-args nil)
- '(package-selected-packages
-   '(bazel-mode avy irony anaconda-mode go-mode company yasnippet flycheck-package smartparens smex emmet-mode tide typescript-mode expand-region go-impl go-guru protobuf-mode groovy-mode ensime dockerfile-mode add-node-modules-path gotest flycheck-gometalinter go-add-tags go-eldoc nasm-mode flycheck-irony yaml-mode window-numbering which-key web-mode use-package terraform-mode spacemacs-theme spaceline smooth-scrolling selectric-mode restclient rainbow-mode projectile paradox move-text markdown-mode magit json-mode js2-mode iedit hungry-delete guru-mode google-c-style golden-ratio git-gutter flycheck-protobuf flycheck flx-ido exec-path-from-shell eslint-fix editorconfig dracula-theme company-irony company-go company-c-headers company-anaconda clang-format anzu ace-window))
- '(paradox-github-token t))
-(custom-set-faces
- ;; custom-set-faces was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- )
-
-;;; init.el --- My Config
+;;; init.el --- My Config -*- lexical-binding: t -*-
 
 ;;; Commentary:
 
 ;;; Code:
+;; from spacemacs
+;; less garbage collection during init
+(setq gc-cons-threshold 402653184 gc-cons-percentage 0.6)
+(add-hook 'emacs-startup-hook
+          (lambda ()
+            (setq gc-cons-threshold 100000000
+                  gc-cons-percentage 0.1)))
+
 (require 'package)
 (add-to-list 'package-archives '("melpa" . "http://melpa.org/packages/"))
-(add-to-list 'package-archives '("melpa-stable" . "http://stable.melpa.org/packages/"))
+;;(add-to-list 'package-archives '("melpa-stable" . "http://stable.melpa.org/packages/"))
 (package-initialize)
 
 (unless (package-installed-p 'use-package)
@@ -38,39 +26,91 @@
 (defun disable-ui ()
   (progn
     (menu-bar-mode -1)
+
     (toggle-scroll-bar -1)
     (tool-bar-mode -1)
     (scroll-bar-mode -1)
     (tooltip-mode -1)
-    (setq initial-scratch-message nil)
-    (kill-buffer "*scratch*")))
+    (setq initial-scratch-message nil)))
 
 (defun configure-startup ()
   (progn
     (setq inhibit-startup-screen t)
     (setq inhibit-startup-echo-area-message t)))
 
-(defun setup-flat-ui ()
-  (custom-theme-set-faces
-   'flatui
-   '(company-preview ((t (:foreground "#7f8c8d" :background "#ecf0f1"))))
-   '(company-preview-common ((t (:foreground "#7f8c8d" :background "#ecf0f1"))))
-   '(company-tooltip ((t (:foreground "#2c3e50" :background "#dfe4ea"))))
-   '(company-tooltip-common ((t (:foreground "#2c3e50" :background "#dfe4ea"))))
-   '(company-tooltip-selection ((t (:background "#f1c40f"))))
-   '(company-tooltip-common-selection ((t (:foreground "#2c3e50" :background "#f1c40f"))))
-   '(company-scrollbar-bg ((t (:background "#95a5a6"))))
-   '(company-scrollbar-fg ((t (:background "#1abc9c"))))
-   '(iedit-occurrence ((t (:foreground "#2c3e50" :background "#1abc9c"))))
-   ))
+(defun disable-osx-keys ()
+  "Disable keys defined in `ns-win.el'."
+  (global-unset-key  [?\s-,])
+  (global-unset-key  [?\s-'])
+  (global-unset-key  [?\s-`])
+  (global-unset-key  [?\s-~])
+  (global-unset-key  [?\s--])
+  (global-unset-key  [?\s-:])
+  (global-unset-key  [?\s-?])
+  (global-unset-key  [?\s-^])
+  (global-unset-key  [?\s-&])
+  (global-unset-key  [?\s-C])
+  (global-unset-key  [?\s-D])
+  (global-unset-key  [?\s-E])
+  (global-unset-key  [?\s-L])
+  (global-unset-key  [?\s-M])
+  (global-unset-key  [?\s-S])
+  (global-unset-key  [?\s-a])
+  (global-unset-key  [?\s-c])
+  (global-unset-key  [?\s-d])
+  (global-unset-key  [?\s-e])
+  (global-unset-key  [?\s-f])
+  (global-unset-key  [?\s-g])
+  (global-unset-key  [?\s-h])
+  (global-unset-key  [?\s-H])
+  (global-unset-key  [?\M-\s-h])
+  (global-unset-key  [?\s-j])
+  (global-unset-key  [?\s-k])
+  (global-unset-key  [?\s-l])
+  (global-unset-key  [?\s-m])
+  (global-unset-key  [?\s-o])
+  (global-unset-key  [?\s-q])
+  (global-unset-key  [?\s-s])
+  (global-unset-key  [?\s-t])
+  (global-unset-key  [?\s-u])
+  (global-unset-key  [?\s-v])
+  (global-unset-key  [?\s-w])
+  (global-unset-key  [?\s-x])
+  (global-unset-key  [?\s-y])
+  (global-unset-key  [?\s-z])
+  (global-unset-key  [?\s-+])
+  (global-unset-key  [?\s-=])
+  (global-unset-key  [?\s--])
+  (global-unset-key  [?\s-0])
+  (global-unset-key  [?\s-|])
+  (global-unset-key  [s-kp-bar])
+  (global-unset-key  [?\C-\s- ]))
 
 (defun setup-font ()
-  (set-frame-font "InputCustomSansCompressed-14" nil t)
-  (setq default-frame-alist '((font . "InputCustomSansCompressed-14"))))
+  "Setup fonts and enable `variable-pitch-mode'."
+  (set-frame-font "InputCustomMonoCompressed-14" nil t)
+  (add-to-list 'default-frame-alist '(font . "InputCustomMonoCompressed-14"))
+  (set-face-attribute 'variable-pitch nil :font "InputCustomSansCompressed-14")
+  (add-hook 'text-mode-hook #'variable-pitch-mode)
+  (add-hook 'prog-mode-hook #'variable-pitch-mode))
 
 (defun setup-modeline-font ()
   (set-face-attribute 'mode-line-inactive nil :family "InputCustomMonoCompressed")
   (set-face-attribute 'mode-line nil :family "InputCustomMonoCompressed"))
+
+(defun setup-term-font ()
+  '(term ((t (:background "#292b2e" :foreground "#b2b2b2" :family "InputCustomMonoCompressed")))))
+
+(defun kill-region-or-backward-kill-word (&optional arg region)
+  "`kill-region' if the region is active, otherwise `backward-kill-word'"
+  (interactive
+   (list (prefix-numeric-value current-prefix-arg) (use-region-p)))
+  (if region
+      (kill-region (region-beginning) (region-end))
+    (backward-kill-word arg)))
+
+(defun setup-kill-backwards-word ()
+    (global-set-key (kbd "C-w") 'kill-region-or-backward-kill-word))
 
 (defun enable-extra-functionality ()
   (progn
@@ -104,21 +144,46 @@
     (setq minibuffer-prompt-properties
           '(read-only t point-entered minibuffer-avoid-prompt face minibuffer-prompt))))
 
+;; from https://github.com/purcell/emacs.d/blob/master/lisp/init-windows.el
+(defun split-window-func-with-other-buffer (split-function)
+  (lambda (&optional arg)
+    "Split this window and switch to the new window unless ARG is provided."
+    (interactive "P")
+    (funcall split-function)
+    (let ((target-window (next-window)))
+      (set-window-buffer target-window (other-buffer))
+      (unless arg
+        (select-window target-window)))))
+
+(defun setup-window-splitting ()
+      (global-set-key (kbd "C-x 2") (split-window-func-with-other-buffer #'split-window-below))
+      (global-set-key (kbd "C-x 3") (split-window-func-with-other-buffer #'split-window-horizontally)))
+
 (defun init ()
-  (disable-ui)
+  "Init shared settings."
   (setup-builtins)
-  (setup-font)
   (configure-startup)
   (enable-extra-functionality)
   (disable-bell)
-  (add-hook 'after-init-hook 'setup-modeline-font t nil))
+  (setup-kill-backwards-word)
+  (setup-window-splitting))
+
+(defun init-ui ()
+  "Init UI relating settings.
+FRAME is received from `after-make-frame-functions'."
+  (disable-ui)
+  (setup-font)
+  (setup-modeline-font)
+  (disable-osx-keys))
 
 (defun my-recentf-cleanup ()
   (setq recentf-list '()))
 
-(setq gc-cons-threshold 100000000)
-
 (init)
+(if (daemonp)
+    (add-hook 'after-make-frame-functions
+              (lambda (frame) (with-selected-frame frame (init-ui))))
+  (add-hook 'after-init-hook (init-ui)))
 
 (use-package diminish
   :ensure t)
@@ -136,19 +201,18 @@
 
 (use-package cua-base
   :config
-  (cua-mode)
-  (setq cua-enable-cua-keys nil))
+  (cua-selection-mode t))
 
 (use-package delsel
   :config
   (delete-selection-mode))
 
-(use-package ido
-  :config
-  (progn
-    (ido-mode)
-    (ido-everywhere)
-    (setq ido-use-virtual-buffers t)))
+;; (use-package ido
+;;   :config
+;;   (progn
+;;     (ido-mode)
+;;     (ido-everywhere)
+;;     (setq ido-use-virtual-buffers t)))
 
 (use-package autorevert
   :diminish auto-revert-mode)
@@ -178,11 +242,106 @@
   :config
   (recentf-mode))
 
+(use-package whitespace
+  :ensure t
+  :diminish (global-whitespace-mode . " Ⓦ")
+  :diminish (whitespace-mode . " ⓦ")
+  :config
+  (progn
+    (setq whitespace-line-column 80)
+    (add-hook 'before-save-hook 'whitespace-cleanup)))
+
+(use-package winner
+  :config
+  (winner-mode))
+
 (use-package paradox
   :ensure t
   :config
   (progn
     (paradox-enable)))
+
+(use-package amx
+  :ensure t
+  :config
+  (amx-mode))
+
+(use-package flx
+  :ensure t)
+
+(use-package ivy
+  :ensure t
+  :after amx
+  :config
+  (setq ivy-use-virtual-buffers t)
+  (setq ivy-count-format "(%d/%d) ")
+  (setq ivy-re-builders-alist '((swiper . ivy--regex-plus)
+                                (t . ivy--regex-fuzzy)))
+  (ivy-mode)
+  (global-set-key (kbd "C-x b") 'ivy-switch-buffer))
+
+(use-package counsel
+  :ensure t
+  :config
+  (counsel-mode)
+  (global-set-key (kbd "M-x") 'counsel-M-x))
+
+(use-package swiper
+  :ensure t
+  :config
+  (global-set-key (kbd "C-s") 'swiper))
+
+(use-package hungry-delete
+  :ensure t
+  :diminish hungry-delete-mode
+  :config
+  (global-hungry-delete-mode))
+
+(use-package move-text
+  :ensure t
+  :config
+  (move-text-default-bindings))
+
+(use-package expand-region
+  :ensure t
+  :bind ("C-=" . er/expand-region)
+  :config
+  (er/enable-mode-expansions 'bazel-mode 'er/add-python-mode-expansions))
+
+(use-package multiple-cursors
+  :ensure t
+  :bind (("C-;" . mc/mark-all-like-this)
+         ("C->" . mc/mark-next-like-this)
+         ("C-<" . mc/mark-previous-like-this)))
+
+(use-package avy
+  :ensure t
+  :bind (("C-\"" . avy-move-region)
+         ("C-:" . avy-kill-region)
+         ("C-'" . avy-goto-char-timer)
+         ("M-g g" . avy-goto-line))
+  :config
+  (setq avy-background t)
+  (avy-setup-default))
+
+(use-package ace-window
+  :ensure t
+  :bind ("M-o" . ace-window))
+
+(use-package ace-link
+  :ensure t
+  :config
+  (ace-link-setup-default))
+
+(use-package browse-kill-ring
+  :ensure t
+  :config
+  (browse-kill-ring-default-keybindings))
+
+(use-package rainbow-delimiters
+  :ensure t
+  :config
+  (add-hook 'lisp-mode-hook #'rainbow-delimiters-mode))
 
 (use-package anzu
   :ensure t
@@ -192,37 +351,72 @@
     (setq anzu-cons-mode-line-p nil)
     (global-anzu-mode)))
 
-(use-package flatui-theme
+(use-package kaolin-themes
   :disabled t
-  :ensure t
-  :defer t
   :config
-  (setup-flat-ui))
+  (load-theme 'kaolin-dark t)
+  (kaolin-treemacs-theme))
 
-(use-package dracula-theme
+(use-package doom-themes
   :ensure t
-  :defer t)
+  :config
+  (setq doom-themes-enable-bold t)
+  (setq doom-themes-enable-italic t)
+  (doom-themes-visual-bell-config)
+  (doom-themes-treemacs-config)
+  (load-theme 'doom-one t))
 
-(use-package spacemacs-theme
+(use-package doom-modeline
+  :ensure t
+  :config
+  (setq doom-modeline-buffer-file-name-style 'truncate-with-project)
+  (setq doom-modeline-major-mode-color-icon nil)
+  (setq doom-modeline-minor-modes nil)
+  (setq doom-modeline-github nil)
+  (doom-modeline-mode))
+
+(use-package treemacs
   :ensure t
   :defer t
   :init
-  (load-theme 'spacemacs-dark))
-
-(use-package spaceline
-  :ensure t
-  :init
+  (with-eval-after-load 'winum
+    (define-key winum-keymap (kbd "M-0") #'treemacs-select-window))
   :config
   (progn
-    (require 'spaceline-config)
-    (spaceline-spacemacs-theme)
-    (setq powerline-default-separator "wave")
-    (setq spaceline-workspace-numbers-unicode t)
-    (setq spaceline-window-numbers-unicode t)
-    (setq powerline-height 25)
-    (setq powerline-text-scale-factor 1.0)
-    (setq powerline-image-apple-rgb t)
-    (spaceline-compile)))
+    ;; The default width and height of the icons is 22 pixels. If you are
+    ;; using a Hi-DPI display, uncomment this to double the icon size.
+    ;;(treemacs-resize-icons 44)
+
+    (treemacs-follow-mode t)
+    (treemacs-filewatch-mode t)
+    (treemacs-fringe-indicator-mode t)
+    (pcase (cons (not (null (executable-find "git")))
+                 (not (null (executable-find "python3"))))
+      (`(t . t)
+       (treemacs-git-mode 'deferred))
+      (`(t . _)
+       (treemacs-git-mode 'simple))))
+  :bind
+  (:map global-map
+        ("M-0"       . treemacs-select-window)
+        ("C-x t 1"   . treemacs-delete-other-windows)
+        ("C-x t t"   . treemacs)
+        ("C-x t B"   . treemacs-bookmark)
+        ("C-x t C-t" . treemacs-find-file)
+        ("C-x t M-t" . treemacs-find-tag)))
+
+(use-package treemacs-projectile
+  :after treemacs projectile
+  :ensure t)
+
+(use-package treemacs-icons-dired
+  :after treemacs dired
+  :ensure t
+  :config (treemacs-icons-dired-mode))
+
+(use-package treemacs-magit
+  :after treemacs magit
+  :ensure t)
 
 (use-package git-gutter
   :ensure t
@@ -232,14 +426,19 @@
   (setq git-gutter:window-width 2)
   (global-git-gutter-mode))
 
+(use-package ripgrep
+  :ensure t)
+
 (use-package projectile
   :ensure t
-  :defer 2
   :config
   (projectile-mode)
-  (setq projectile-mode-line
-         '(:eval (format " Projectile[%s]"
-                        (projectile-project-name)))))
+  (define-key projectile-mode-map (kbd "C-c p") 'projectile-command-map)
+  (setq projectile-completion-system 'ivy)
+  (setq projectile-globally-ignored-directories
+        (append projectile-globally-ignored-directories
+                '("*.terraform"
+                  "*vendor"))))
 
 (use-package exec-path-from-shell
   :ensure t
@@ -250,6 +449,52 @@
 
 (use-package smartparens
   :ensure t)
+
+(use-package editorconfig
+  :ensure t
+  :diminish (editorconfig-mode . " ⓔ")
+  :config
+  (editorconfig-mode))
+
+(use-package restclient
+  :ensure t)
+
+(use-package magit
+  :ensure t)
+
+(use-package winum
+  :ensure t
+  :config
+  (winum-mode))
+
+(use-package golden-ratio
+  :ensure t
+  :diminish (golden-ratio-mode . " ⓖ")
+  :config
+  (progn
+    (golden-ratio-mode)
+    (setq window-combination-resize t)
+    (setq golden-ratio-auto-scale t)
+    (setq golden-ratio-extra-commands
+          (append golden-ratio-extra-commands
+                  '(ace-window
+                    ace-delete-window
+                    ace-select-window
+                    ace-swap-window
+                    ace-maximize-window
+                    avy-pop-mark
+                    avy-goto-char-timer)))))
+
+(use-package smooth-scrolling
+  :ensure t
+  :config
+  (smooth-scrolling-mode))
+
+(use-package rainbow-mode
+  :ensure t
+  :diminish rainbow-mode
+  :config
+  (rainbow-mode))
 
 (use-package yasnippet
   :ensure t
@@ -267,6 +512,35 @@
   :config
   (flycheck-package-setup))
 
+(use-package company
+  :ensure t
+  :diminish (company-mode . " ⓐ")
+  :config
+  (global-company-mode)
+  (setq company-dabbrev-downcase nil))
+
+(use-package lsp-mode
+  :ensure t
+  :config
+  (lsp))
+
+(use-package lsp-ui
+  :ensure t
+  :after lsp-mode
+  :config
+  (add-hook 'lsp-mode-hook 'lsp-ui-mode))
+
+(use-package company-lsp
+  :ensure t
+  :after company lsp-mode
+  :config
+  (push 'company-lsp company-backends))
+
+(use-package lispy
+  :ensure t
+  :config
+  (add-hook 'emacs-lisp-mode-hook #'lispy-mode))
+
 (use-package dockerfile-mode
   :ensure t)
 
@@ -275,15 +549,9 @@
   :config
   (add-to-list 'auto-mode-alist '("\\.s\\'" . nasm-mode)))
 
-(use-package company
-  :ensure t
-  :diminish (company-mode . " ⓐ")
-  :config
-  (global-company-mode)
-  (setq company-dabbrev-downcase nil))
-
 (use-package bazel-mode
   :ensure
+  ;;:load-path "bazel-mode/"
   :config
   (progn
     (add-hook 'bazel-mode-hook (lambda () (add-hook 'before-save-hook #'bazel-format nil t)))))
@@ -295,7 +563,8 @@
   (progn
     (setq gofmt-command "goimports")
     (add-hook 'before-save-hook #'gofmt-before-save)
-    (add-hook 'go-mode-hook (lambda () (local-set-key (kbd "M-.") #'godef-jump)))))
+    (add-hook 'go-mode-hook (lambda () (local-set-key (kbd "M-.") #'godef-jump)))
+    (add-hook 'go-mode-hook 'subword-mode)))
 
 (use-package go-guru
   :ensure t
@@ -324,6 +593,9 @@
 (use-package gotest
   :ensure t)
 
+(use-package go-rename
+  :ensure t)
+
 (use-package company-go
   :ensure t
   :config
@@ -350,7 +622,7 @@
 
 (use-package ensime
   :ensure t
-  :pin melpa-stable
+;;  :pin melpa-stable
   :init
   (setq ensime-startup-snapshot-notification nil)
   (setq ensime-startup-notification nil)
@@ -409,8 +681,10 @@
   :defer t
   :config
   (progn
-    (add-hook 'c-mode-common-hook 'google-set-c-style)
-    (add-hook 'c-mode-common-hook 'google-make-newline-indent)))
+    (add-hook 'c-mode-hook 'google-set-c-style)
+    (add-hook 'c-mode-hook 'google-make-newline-indent)
+    (add-hook 'c++-mode-hook 'google-set-c-style)
+    (add-hook 'c++-mode-hook 'google-make-newline-indent)))
 
 (use-package js
   :config
@@ -431,6 +705,7 @@
 
 (use-package add-node-modules-path
   :ensure
+  :load-path "add-node-modules-path/"
   :config
   (progn
     (eval-after-load 'js2-mode
@@ -490,37 +765,20 @@
   :config
   (add-hook 'terraform-mode-hook #'terraform-format-on-save-mode))
 
-(use-package hungry-delete
-  :ensure t
-  :diminish hungry-delete-mode
-  :config
-  (global-hungry-delete-mode))
+(use-package swift-mode
+  :ensure t)
 
-(use-package move-text
+(use-package flycheck-swift3
   :ensure t
   :config
-  (move-text-default-bindings))
+  (with-eval-after-load 'flycheck
+    (add-hook 'flycheck-mode-hook #'flycheck-swift3-setup)))
 
-(use-package expand-region
+(use-package flycheck-objc-clang
   :ensure t
-  :bind ("C-=" . er/expand-region))
-
-(use-package iedit
-  :ensure t
-  :bind ("C-;" . iedit-mode))
-
-(use-package avy
-  :ensure t
-  :bind (("C-:" . avy-move-region)
-         ("C-'" . avy-goto-char-timer)
-         ("M-g g" . avy-goto-line))
   :config
-  (setq avy-background t)
-  (avy-setup-default))
-
-(use-package ace-window
-  :ensure t
-  :bind ("M-p" . ace-window))
+  (with-eval-after-load 'flycheck
+    (add-hook 'flycheck-mode-hook #'flycheck-objc-clang-setup)))
 
 (use-package which-key
   :ensure t
@@ -537,137 +795,168 @@
     (add-hook 'prog-mode-hook 'guru-mode)
     (setq guru-warn-only t)))
 
-(use-package whitespace
-  :ensure t
-  :diminish (global-whitespace-mode . " Ⓦ")
-  :diminish (whitespace-mode . " ⓦ")
-  :config
-  (progn
-    (setq whitespace-line-column 80)
-    (add-hook 'before-save-hook 'whitespace-cleanup)))
+;; old packages
 
-(use-package editorconfig
-  :ensure t
-  :diminish (editorconfig-mode . " ⓔ")
-  :config
-  (editorconfig-mode))
+;; (use-package flx-ido
+;;   :disabled t
+;;   :ensure t
+;;   :config
+;;   (progn
+;;     (flx-ido-mode)
+;;     (setq ido-enable-flex-matching t)
+;;     (setq ido-use-faces nil)))
 
-(use-package flx-ido
-  :ensure t
-  :config
-  (progn
-    (flx-ido-mode)
-    (setq ido-enable-flex-matching t)
-    (setq ido-use-faces nil)))
+;; ;; switch to rg
+;; (use-package ag
+;;   :disabled t
+;;   :ensure t)
 
-(use-package smex
-  :ensure t
-  :config
-  (progn
-    (smex-initialize)
-    (global-set-key (kbd "M-x") 'smex)))
+;; ;; switch to treemacs
+;; (use-package neotree
+;;   :disabled t
+;;   :ensure t
+;;   :config
+;;   (setq neo-theme (if (display-graphic-p) 'icons 'arrow))
+;;   (setq neo-window-width 40))
 
-(use-package restclient
-  :ensure t)
+;; (use-package selectric-mode
+;;   :disabled t
+;;   :load-path "selectric-mode/"
+;;   :ensure t
+;;   :diminish (selectric-mode . "♬")
+;;   :config
+;;   (selectric-mode))
 
-(use-package magit
-  :ensure t)
+;; ;; just use show-paren-mode
+;; (use-package highlight-parentheses
+;;   :disabled t
+;;   :ensure t
+;;   :diminish highlight-parentheses-mode
+;;   :init
+;;   (add-hook 'prog-mode-hook #'highlight-parentheses-mode))
 
-(use-package window-numbering
-  :ensure t
-  :config
-  (progn
-    (defun window-numbering-install-mode-line (&optional position) "Do nothing.")
-    (window-numbering-mode)))
+;; (use-package highlight-symbol
+;;   :disabled t
+;;   :ensure t
+;;   :config
+;;   (highlight-symbol-mode))
 
-(use-package golden-ratio
-  :ensure t
-  :diminish (golden-ratio-mode . " ⓖ")
-  :config
-  (progn
-    (golden-ratio-mode)
-    (setq window-combination-resize t)
-    (setq golden-ratio-auto-scale t)
-    (setq golden-ratio-extra-commands
-          (append golden-ratio-extra-commands
-                  '(ace-window
-                    ace-delete-window
-                    ace-select-window
-                    ace-swap-window
-                    ace-maximize-window
-                    avy-pop-mark
-                    avy-goto-char-timer)))))
+;; (use-package highlight-indentation
+;;   :disabled t
+;;   :ensure t
+;;   :config
+;;   (highlight-indentation-mode))
 
-(use-package smooth-scrolling
-  :ensure t
-  :config
-  (smooth-scrolling-mode))
+;; (use-package indent-guide
+;;   :disabled t
+;;   :ensure t
+;;   :diminish indent-guide-mode
+;;   :config
+;;   (indent-guide-global-mode))
 
-(use-package selectric-mode
-  :disabled t
-  :load-path "selectric-mode/"
-  :ensure t
-  :diminish (selectric-mode . "♬")
-  :config
-  (selectric-mode))
+;; (use-package centered-cursor-mode
+;;   :disabled t
+;;   :ensure t
+;;   :diminish (centered-cursor-mode . " ⊝")
+;;   :config
+;;   (progn
+;;     (global-centered-cursor-mode)
+;;     (setq ccm-recenter-at-end-of-file t
+;;           ccm-ignored-commands '(mouse-drag-region
+;;                                  mouse-set-point
+;;                                  widget-button-click
+;;                                  scroll-bar-toolkit-scroll))))
 
-(use-package rainbow-mode
-  :ensure t
-  :diminish rainbow-mode
-  :config
-  (rainbow-mode))
+;; (use-package diff-hl
+;;   :disabled t
+;;   :ensure t
+;;   :config
+;;   (global-diff-hl-mode))
 
-;; just use show-paren-mode
-(use-package highlight-parentheses
-  :disabled t
-  :ensure t
-  :diminish highlight-parentheses-mode
-  :init
-  (add-hook 'prog-mode-hook #'highlight-parentheses-mode))
+;; (use-package fill-column-indicator
+;;   :disabled t
+;;   :ensure t
+;;   :defer 2
+;;   :config
+;;   (fci-mode))
 
-(use-package highlight-symbol
-  :disabled t
-  :ensure t
-  :config
-  (highlight-symbol-mode))
+;; (use-package iedit
+;;   :disabled true
+;;   :ensure t
+;;   :bind ("C-;" . iedit-mode))
 
-(use-package highlight-indentation
-  :disabled t
-  :ensure t
-  :config
-  (highlight-indentation-mode))
+;; (use-package flatui-theme
+;;   :disabled t
+;;   :ensure t
+;;   :defer t
+;;   :config
+;;   (setup-flat-ui))
 
-(use-package indent-guide
-  :disabled t
-  :ensure t
-  :diminish indent-guide-mode
-  :config
-  (indent-guide-global-mode))
+;; (use-package dracula-theme
+;;   :disabled t
+;;   :ensure t
+;;   :defer t)
 
-(use-package centered-cursor-mode
-  :disabled t
-  :ensure t
-  :diminish (centered-cursor-mode . " ⊝")
-  :config
-  (progn
-    (global-centered-cursor-mode)
-    (setq ccm-recenter-at-end-of-file t
-          ccm-ignored-commands '(mouse-drag-region
-                                 mouse-set-point
-                                 widget-button-click
-                                 scroll-bar-toolkit-scroll))))
+;; (use-package spacemacs-common
+;;   :disabled t
+;;   :ensure spacemacs-theme
+;;   :config
+;;   (if (daemonp)
+;;       (add-hook 'after-make-frame-functions
+;;                 (lambda (frame)
+;;                   (with-selected-frame frame (load-theme 'spacemacs-dark))))
+;;     (load-theme 'spacemacs-dark)))
 
-(use-package diff-hl
-  :disabled t
-  :ensure t
-  :config
-  (global-diff-hl-mode))
 
-(use-package fill-column-indicator
-  :disabled t
-  :ensure t
-  :defer 2
-  :config
-  (fci-mode))
+;; (defun init-spaceline ()
+;;   (require 'spaceline-config)
+;;   (spaceline-spacemacs-theme)
+;;                                         ;(set-face-attribute 'mode-line nil :box nil)
+;;                                         ;(set-face-attribute 'mode-line-inactive nil :box nil)
+;;                                         ;(set-face-attribute 'mode-line-highlight nil :box nil)
+;;   (setq powerline-default-separator "bar")
+;;   (setq spaceline-workspace-numbers-unicode t)
+;;   (setq spaceline-window-numbers-unicode t)
+;;   (setq powerline-height 25)
+;;   (setq powerline-text-scale-factor 1.0)
+;;   (setq powerline-image-apple-rgb t)
+;;   (spaceline-compile))
+
+;; (use-package spaceline
+;;   :disabled t
+;;   :ensure t
+;;   :demand t
+;;   :config
+;;   (if (daemonp)
+;;       (add-hook 'after-make-frame-functions
+;;                 (lambda (frame)
+;;                   (with-selected-frame frame (init-spaceline))))
+;;     (init-spaceline)))
+
+;; (use-package spaceline-all-the-icons
+;;   :disabled t
+;;   :ensure t
+;;   :after spaceline
+;;   :config
+;;   (setq spaceline-all-the-icons-clock-always-visible nil)
+;;   (spaceline-all-the-icons--setup-anzu)
+;;   (spaceline-all-the-icons--setup-package-updates)
+;;   (spaceline-all-the-icons--setup-paradox)
+;;   (spaceline-all-the-icons--setup-neotree)
+;;   (setq spaceline-all-the-icons-separator-type 'none)
+;;   (spaceline-all-the-icons-theme))
 
 ;;; init.el ends here
+(custom-set-variables
+ ;; custom-set-variables was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ '(package-selected-packages
+   '(lispy lispi yaml-mode winum which-key web-mode use-package treemacs-projectile treemacs-magit treemacs-icons-dired tide terraform-mode swift-mode smooth-scrolling smartparens ripgrep restclient rainbow-mode rainbow-delimiters protobuf-mode paradox nasm-mode multiple-cursors move-text lsp-ui json-mode js2-mode hungry-delete guru-mode gotest google-c-style golden-ratio go-rename go-guru go-eldoc go-add-tags git-gutter flycheck-swift3 flycheck-package flycheck-objc-clang flycheck-irony flycheck-gometalinter flx expand-region exec-path-from-shell eslint-fix ensime emmet-mode editorconfig doom-themes doom-modeline dockerfile-mode diminish counsel company-lsp company-irony company-go company-c-headers company-anaconda clang-format browse-kill-ring bazel-mode anzu amx add-node-modules-path ace-link)))
+(custom-set-faces
+ ;; custom-set-faces was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ )
