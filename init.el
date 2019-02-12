@@ -26,7 +26,6 @@
 (defun disable-ui ()
   (progn
     (menu-bar-mode -1)
-
     (toggle-scroll-bar -1)
     (tool-bar-mode -1)
     (scroll-bar-mode -1)
@@ -101,17 +100,6 @@
 (defun setup-term-font ()
   '(term ((t (:background "#292b2e" :foreground "#b2b2b2" :family "InputCustomMonoCompressed")))))
 
-(defun kill-region-or-backward-kill-word (&optional arg region)
-  "`kill-region' if the region is active, otherwise `backward-kill-word'"
-  (interactive
-   (list (prefix-numeric-value current-prefix-arg) (use-region-p)))
-  (if region
-      (kill-region (region-beginning) (region-end))
-    (backward-kill-word arg)))
-
-(defun setup-kill-backwards-word ()
-    (global-set-key (kbd "C-w") 'kill-region-or-backward-kill-word))
-
 (defun enable-extra-functionality ()
   (progn
     (put 'narrow-to-region 'disabled nil)
@@ -159,6 +147,26 @@
       (global-set-key (kbd "C-x 2") (split-window-func-with-other-buffer #'split-window-below))
       (global-set-key (kbd "C-x 3") (split-window-func-with-other-buffer #'split-window-horizontally)))
 
+(defun kill-region-or-backward-kill-word (&optional arg region)
+  "`kill-region' if the region is active, otherwise `backward-kill-word'"
+  (interactive
+   (list (prefix-numeric-value current-prefix-arg) (use-region-p)))
+  (if region
+      (kill-region (region-beginning) (region-end))
+    (backward-kill-word arg)))
+
+(defun setup-kill-backwards-word ()
+  (global-set-key (kbd "C-w") 'kill-region-or-backward-kill-word))
+
+(defun move-beginning-of-line-or-indent ()
+  (interactive)
+  (if (bolp)
+      (back-to-indentation)
+    (beginning-of-line)))
+
+(defun setup-move-beginning-of-line-or-indent ()
+  (global-set-key (kbd "C-a") 'move-beginning-of-line-or-indent))
+
 (defun init ()
   "Init shared settings."
   (setup-builtins)
@@ -166,7 +174,8 @@
   (enable-extra-functionality)
   (disable-bell)
   (setup-kill-backwards-word)
-  (setup-window-splitting))
+  (setup-window-splitting)
+  (setup-move-beginning-of-line-or-indent))
 
 (defun init-ui ()
   "Init UI relating settings.
@@ -264,7 +273,7 @@ FRAME is received from `after-make-frame-functions'."
 (use-package amx
   :ensure t
   :config
-  (amx-mode))
+  (amx-initialize))
 
 (use-package flx
   :ensure t)
@@ -278,13 +287,21 @@ FRAME is received from `after-make-frame-functions'."
   (setq ivy-re-builders-alist '((swiper . ivy--regex-plus)
                                 (t . ivy--regex-fuzzy)))
   (ivy-mode)
-  (global-set-key (kbd "C-x b") 'ivy-switch-buffer))
+  (global-set-key (kbd "C-x b") 'ivy-switch-buffer)
+  (global-set-key (kbd "C-c C-r") 'ivy-resume))
 
 (use-package counsel
   :ensure t
   :config
   (counsel-mode)
-  (global-set-key (kbd "M-x") 'counsel-M-x))
+  (global-set-key (kbd "M-x") 'counsel-M-x)
+  (global-set-key (kbd "M-y") 'counsel-yank-pop)
+  (global-set-key (kbd "C-M-i") 'counsel-company)
+  (global-set-key (kbd "<f1> f") 'counsel-describe-function)
+  (global-set-key (kbd "<f1> v") 'counsel-describe-variable)
+  (global-set-key (kbd "<f1> l") 'counsel-find-library)
+  (global-set-key (kbd "<f2> i") 'counsel-info-lookup-symbol)
+  (global-set-key (kbd "<f2> u") 'counsel-unicode-char))
 
 (use-package swiper
   :ensure t
@@ -334,6 +351,7 @@ FRAME is received from `after-make-frame-functions'."
   (ace-link-setup-default))
 
 (use-package browse-kill-ring
+  :disabled t
   :ensure t
   :config
   (browse-kill-ring-default-keybindings))
@@ -460,7 +478,9 @@ FRAME is received from `after-make-frame-functions'."
   :ensure t)
 
 (use-package magit
-  :ensure t)
+  :ensure t
+  :config
+  (setq magit-completing-read-function 'ivy-completing-read))
 
 (use-package winum
   :ensure t
