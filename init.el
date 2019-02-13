@@ -556,11 +556,6 @@ FRAME is received from `after-make-frame-functions'."
   :config
   (push 'company-lsp company-backends))
 
-(use-package lispy
-  :ensure t
-  :config
-  (add-hook 'emacs-lisp-mode-hook #'lispy-mode))
-
 (use-package dockerfile-mode
   :ensure t)
 
