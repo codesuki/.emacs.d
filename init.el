@@ -182,7 +182,9 @@
   (setup-undo-limits)
   (setup-kill-backwards-word)
   (setup-window-splitting)
-  (setup-move-beginning-of-line-or-indent))
+  (setup-move-beginning-of-line-or-indent)
+  (global-set-key (kbd "C-?") 'help-command)
+  (define-key key-translation-map (kbd "C-h") (kbd "<DEL>")))
 
 (defun init-ui ()
   "Init UI relating settings.
