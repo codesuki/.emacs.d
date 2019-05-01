@@ -335,7 +335,9 @@ FRAME is received from `after-make-frame-functions'."
   :ensure t
   :bind ("C-=" . er/expand-region)
   :config
-  (er/enable-mode-expansions 'bazel-mode 'er/add-python-mode-expansions))
+  (require 'subword-mode-expansions)
+  (er/enable-mode-expansions 'bazel-mode 'er/add-python-mode-expansions)
+  (er/enable-mode-expansions 'go-mode 'er/add-cc-mode-expansions))
 
 (use-package multiple-cursors
   :ensure t
@@ -537,7 +539,9 @@ FRAME is received from `after-make-frame-functions'."
   :ensure t
   :diminish (flycheck-mode . " ⓢ")
   :config
-  (global-flycheck-mode))
+  (global-flycheck-mode)
+  (setq flycheck-go-golint-executable "golint")
+  (setq flycheck-go-megacheck-executable "staticcheck"))
 
 (use-package flycheck-package
   :ensure t
@@ -591,25 +595,14 @@ FRAME is received from `after-make-frame-functions'."
     (setq gofmt-command "goimports")
     (add-hook 'before-save-hook #'gofmt-before-save)
     (add-hook 'go-mode-hook (lambda () (local-set-key (kbd "M-.") #'godef-jump)))
-    (add-hook 'go-mode-hook 'subword-mode)))
+    (add-hook 'go-mode-hook (lambda () (add-to-list 'flycheck-disabled-checkers 'go-vet)))
+    (add-hook 'go-mode-hook 'subword-mode)
+    (add-hook 'go-mode-hook (lambda () (define-key go-mode-map (kbd "C-=") #'go-guru-expand-region)))))
 
 (use-package go-guru
   :ensure t
   :config
   (add-hook 'go-mode-hook #'go-guru-hl-identifier-mode))
-
-(use-package flycheck-gometalinter
-  :ensure t
-  :config
-  (progn
-    (flycheck-gometalinter-setup)
-    (setq flycheck-gometalinter-vendor t)
-    (setq flycheck-gometalinter-fast t)))
-
-(use-package go-eldoc
-  :ensure t
-  :config
-  (add-hook 'go-mode-hook 'go-eldoc-setup))
 
 (use-package go-add-tags
   :ensure t
@@ -624,6 +617,7 @@ FRAME is received from `after-make-frame-functions'."
   :ensure t)
 
 (use-package company-go
+  :disabled t
   :ensure t
   :config
   (eval-after-load 'company '(add-to-list 'company-backends 'company-go)))
