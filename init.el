@@ -168,12 +168,18 @@
 (defun setup-move-beginning-of-line-or-indent ()
   (global-set-key (kbd "C-a") 'move-beginning-of-line-or-indent))
 
+(defun setup-undo-limits ()
+  (setq undo-limit 80000000)
+  (setq undo-strong-limit 12000000)
+  (setq undo-outer-limit 12000000))
+
 (defun init ()
   "Init shared settings."
   (setup-builtins)
   (configure-startup)
   (enable-extra-functionality)
   (disable-bell)
+  (setup-undo-limits)
   (setup-kill-backwards-word)
   (setup-window-splitting)
   (setup-move-beginning-of-line-or-indent))
