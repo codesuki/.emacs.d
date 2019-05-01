@@ -291,13 +291,16 @@ FRAME is received from `after-make-frame-functions'."
   :ensure t
   :after amx
   :config
+  (setq enable-recursive-minibuffers t)
   (setq ivy-use-virtual-buffers t)
   (setq ivy-count-format "(%d/%d) ")
   (setq ivy-re-builders-alist '((swiper . ivy--regex-plus)
                                 (t . ivy--regex-fuzzy)))
   (ivy-mode)
   (global-set-key (kbd "C-x b") 'ivy-switch-buffer)
-  (global-set-key (kbd "C-c C-r") 'ivy-resume))
+  (global-set-key (kbd "C-c C-r") 'ivy-resume)
+  (define-key ivy-minibuffer-map (kbd "C-j") #'ivy-immediate-done)
+  (define-key ivy-minibuffer-map (kbd "RET") #'ivy-alt-done))
 
 (use-package counsel
   :ensure t
