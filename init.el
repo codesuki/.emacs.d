@@ -270,8 +270,22 @@ FRAME is received from `after-make-frame-functions'."
     (add-hook 'before-save-hook 'whitespace-cleanup)))
 
 (use-package winner
+  :ensure t
   :config
   (winner-mode))
+
+(use-package window-purpose
+  :load-path "~/Development/emacs-purpose"
+  ;; :ensure t
+  :config
+  (setq purpose-default-action-order 'prefer-same-window)
+  ;; (add-to-list 'purpose-user-mode-purposes
+  ;;              '((bazel-mode . edit)
+  ;;                (terraform-mode . edit))
+  ;; (purpose-compile-user-configuration)
+  (purpose-mode)
+  (purpose-x-golden-ratio-setup)
+  (purpose-x-popwin-setup))
 
 (use-package paradox
   :ensure t
