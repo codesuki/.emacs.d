@@ -125,6 +125,7 @@
     (fset 'yes-or-no-p 'y-or-n-p)
     (setq make-backup-files nil)
     (setq use-dialog-box nil)
+    (setq confirm-kill-processes nil)
     (unless (file-exists-p auto-save-path)
       (make-directory auto-save-path t))
     (setq auto-save-file-name-transforms
