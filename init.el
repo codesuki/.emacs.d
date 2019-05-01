@@ -573,20 +573,15 @@ FRAME is received from `after-make-frame-functions'."
 
 (use-package lsp-mode
   :ensure t
-  :config
-  (lsp))
+  :commands lsp)
 
 (use-package lsp-ui
   :ensure t
-  :after lsp-mode
-  :config
-  (add-hook 'lsp-mode-hook 'lsp-ui-mode))
+  :commands lsp-ui-mode)
 
 (use-package company-lsp
   :ensure t
-  :after company lsp-mode
-  :config
-  (push 'company-lsp company-backends))
+  :commands company-lsp)
 
 (use-package dockerfile-mode
   :ensure t)
@@ -613,6 +608,7 @@ FRAME is received from `after-make-frame-functions'."
     (add-hook 'go-mode-hook (lambda () (local-set-key (kbd "M-.") #'godef-jump)))
     (add-hook 'go-mode-hook (lambda () (add-to-list 'flycheck-disabled-checkers 'go-vet)))
     (add-hook 'go-mode-hook 'subword-mode)
+    (add-hook 'go-mode-hook 'lsp-mode)
     (add-hook 'go-mode-hook (lambda () (define-key go-mode-map (kbd "C-=") #'go-guru-expand-region)))))
 
 (use-package go-guru
