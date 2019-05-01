@@ -548,6 +548,16 @@ FRAME is received from `after-make-frame-functions'."
   :config
   (flycheck-package-setup))
 
+;; (flycheck-define-checker protobuf
+;;   "A Scala syntax checker using the Scala compiler.
+
+;; See URL `https://www.scala-lang.org/'."
+;;   :command ("prototool" "lint" source-original)
+;;   :error-patterns
+;;   ((error line-start (file-name) ":" line ":" column ":" (message) line-end))
+;;   :modes protobuf-mode
+;;   :next-checkers 'protobuf-protoc)
+
 (use-package company
   :ensure t
   :diminish (company-mode . " ⓐ")
