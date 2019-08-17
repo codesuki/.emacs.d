@@ -129,6 +129,7 @@
     (setq make-backup-files nil)
     (setq use-dialog-box nil)
     (setq confirm-kill-processes nil)
+    (setq load-prefer-newer t)
     (unless (file-exists-p auto-save-path)
       (make-directory auto-save-path t))
     (setq auto-save-file-name-transforms
@@ -197,6 +198,10 @@ FRAME is received from `after-make-frame-functions'."
   (setup-modeline-font)
   (disable-osx-keys))
 
+(defun recompile-all ()
+  "Recompile all packages."
+  (byte-recompile-directory package-user-dir nil 'force))
+
 (defun my-recentf-cleanup ()
   (setq recentf-list '()))
 
@@ -205,6 +210,12 @@ FRAME is received from `after-make-frame-functions'."
     (add-hook 'after-make-frame-functions
               (lambda (frame) (with-selected-frame frame 'init-ui)))
   (init-ui))
+
+(use-package auto-compile
+  :ensure t
+  :config
+  (auto-compile-on-load-mode)
+  (auto-compile-on-save-mode))
 
 (use-package diminish
   :ensure t)
