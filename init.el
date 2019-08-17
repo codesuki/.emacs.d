@@ -455,6 +455,8 @@ FRAME is received from `after-make-frame-functions'."
   (setq doom-modeline-major-mode-color-icon nil)
   (setq doom-modeline-minor-modes nil)
   (setq doom-modeline-github t)
+  (setq doom-modeline-buffer-encoding nil)
+  (setq doom-modeline-env-version nil)
   (doom-modeline-mode))
 
 (use-package treemacs
