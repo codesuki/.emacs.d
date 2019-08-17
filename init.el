@@ -296,7 +296,11 @@ FRAME is received from `after-make-frame-functions'."
   :config
   (winner-mode))
 
+(use-package imenu-list
+  :ensure t)
+
 (use-package window-purpose
+  :after imenu-list
   :load-path "~/Development/emacs-purpose"
   ;; :ensure t
   :config
@@ -306,6 +310,7 @@ FRAME is received from `after-make-frame-functions'."
   ;;                (terraform-mode . edit))
   ;; (purpose-compile-user-configuration)
   (purpose-mode)
+  (require 'window-purpose-x)
   (purpose-x-golden-ratio-setup)
   (purpose-x-popwin-setup))
 
