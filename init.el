@@ -598,8 +598,7 @@ FRAME is received from `after-make-frame-functions'."
   :diminish (flycheck-mode . " ⓢ")
   :config
   (global-flycheck-mode)
-  (setq flycheck-go-golint-executable "golint")
-  (setq flycheck-go-megacheck-executable "staticcheck"))
+  (setq flycheck-go-golint-executable "golint"))
 
 (use-package flycheck-package
   :ensure t
@@ -629,11 +628,25 @@ FRAME is received from `after-make-frame-functions'."
   (global-company-mode)
   (setq company-dabbrev-downcase nil))
 
+(defun setup-lsp-keymap ()
+  "Add a keymap to go-mode for lsp commands."
+  (let ((m (define-prefix-command 'go-lsp-map)))
+    (define-key m "d" #'lsp-find-declaration)
+    (define-key m "r" #'lsp-find-references)
+    (define-key m "t" #'lsp-find-type-definition))
+
+  (define-key go-mode-map (kbd "C-c C-l") 'go-lsp-map))
+
 (use-package lsp-mode
   :ensure t
-  :commands lsp)
+  :commands lsp
+  :config
+  (setq lsp-symbol-highlighting-skip-current t)
+  (setq lsp-enable-links nil)
+  (setq lsp-eldoc-render-all t))
 
 (use-package lsp-ui
+  :disabled t
   :ensure t
   :commands lsp-ui-mode)
 
@@ -663,11 +676,16 @@ FRAME is received from `after-make-frame-functions'."
   (progn
     (setq gofmt-command "goimports")
     (add-hook 'before-save-hook #'gofmt-before-save)
-    (add-hook 'go-mode-hook (lambda () (local-set-key (kbd "M-.") #'godef-jump)))
-    (add-hook 'go-mode-hook (lambda () (add-to-list 'flycheck-disabled-checkers 'go-vet)))
     (add-hook 'go-mode-hook 'subword-mode)
-    (add-hook 'go-mode-hook 'lsp-mode)
-    (add-hook 'go-mode-hook (lambda () (define-key go-mode-map (kbd "C-=") #'go-guru-expand-region)))))
+    (add-hook 'go-mode-hook #'lsp)
+    (add-hook 'go-mode-hook 'setup-lsp-keymap)
+    (add-hook 'go-mode-hook (lambda () (local-set-key (kbd "C-.") #'lsp-find-definition)))
+    (add-hook 'go-mode-hook (lambda () (define-key go-mode-map (kbd "C-=") #'go-guru-expand-region)))
+    (add-hook 'go-mode-hook (lambda () (add-to-list 'flycheck-disabled-checkers 'go-test)))
+    (add-hook 'go-mode-hook (lambda () (add-to-list 'flycheck-disabled-checkers 'go-vet)))
+    (add-hook 'go-mode-hook (lambda () (add-to-list 'flycheck-disabled-checkers 'go-build)))
+    (add-hook 'go-mode-hook (lambda () (add-to-list 'flycheck-disabled-checkers 'go-megacheck)))
+    (add-hook 'go-mode-hook (lambda () (add-to-list 'flycheck-disabled-checkers 'go-staticcheck)))))
 
 (use-package go-guru
   :ensure t
