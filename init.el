@@ -192,6 +192,7 @@
   (setup-window-splitting)
   (setup-move-beginning-of-line-or-indent)
   (setup-auth)
+  (global-set-key (kbd "M-z") 'zap-up-to-char)
   (global-set-key (kbd "C-?") 'help-command)
   (define-key key-translation-map (kbd "C-h") (kbd "<DEL>")))
 
@@ -328,6 +329,12 @@ FRAME is received from `after-make-frame-functions'."
 (use-package flx
   :ensure t)
 
+;; https://github.com/abo-abo/swiper/issues/2052
+(defun my-ivy-kill-current ()
+  "Save current Ivy candidate to the `kill-ring'."
+  (interactive)
+  (kill-new (ivy-state-current ivy-last)))
+
 (use-package ivy
   :ensure t
   :after amx
@@ -341,7 +348,8 @@ FRAME is received from `after-make-frame-functions'."
   (global-set-key (kbd "C-x b") 'ivy-switch-buffer)
   (global-set-key (kbd "C-c C-r") 'ivy-resume)
   (define-key ivy-minibuffer-map (kbd "C-j") #'ivy-immediate-done)
-  (define-key ivy-minibuffer-map (kbd "RET") #'ivy-alt-done))
+  (define-key ivy-minibuffer-map (kbd "RET") #'ivy-alt-done)
+  (define-key ivy-minibuffer-map (kbd "M-w") #'my-ivy-kill-current))
 
 (use-package counsel
   :ensure t
@@ -349,6 +357,7 @@ FRAME is received from `after-make-frame-functions'."
   (counsel-mode)
   (global-set-key (kbd "M-x") 'counsel-M-x)
   (global-set-key (kbd "M-y") 'counsel-yank-pop)
+  (global-set-key (kbd "C-c g") 'counsel-git)
   (global-set-key (kbd "C-M-i") 'counsel-company)
   (global-set-key (kbd "<f1> f") 'counsel-describe-function)
   (global-set-key (kbd "<f1> v") 'counsel-describe-variable)
