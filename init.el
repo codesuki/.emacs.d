@@ -5,6 +5,10 @@
 ;;; Code:
 ;; from spacemacs
 ;; less garbage collection during init
+
+;; enable debugging
+;(setq debug-on-error t)
+
 (setq gc-cons-threshold 402653184 gc-cons-percentage 0.6)
 (add-hook 'emacs-startup-hook
           (lambda ()
