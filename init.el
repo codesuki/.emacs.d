@@ -177,6 +177,10 @@
   (setq undo-strong-limit 12000000)
   (setq undo-outer-limit 12000000))
 
+(defun setup-auth ()
+  (setq auth-sources
+    '(macos-keychain-internet)))
+
 (defun init ()
   "Init shared settings."
   (setup-builtins)
@@ -187,6 +191,7 @@
   (setup-kill-backwards-word)
   (setup-window-splitting)
   (setup-move-beginning-of-line-or-indent)
+  (setup-auth)
   (global-set-key (kbd "C-?") 'help-command)
   (define-key key-translation-map (kbd "C-h") (kbd "<DEL>")))
 
@@ -282,6 +287,9 @@ FRAME is received from `after-make-frame-functions'."
   (progn
     (setq whitespace-line-column 80)
     (add-hook 'before-save-hook 'whitespace-cleanup)))
+
+(use-package gnutls
+  :ensure t)
 
 (use-package winner
   :ensure t
@@ -432,7 +440,7 @@ FRAME is received from `after-make-frame-functions'."
   (setq doom-modeline-buffer-file-name-style 'truncate-with-project)
   (setq doom-modeline-major-mode-color-icon nil)
   (setq doom-modeline-minor-modes nil)
-  (setq doom-modeline-github nil)
+  (setq doom-modeline-github t)
   (doom-modeline-mode))
 
 (use-package treemacs
@@ -523,6 +531,10 @@ FRAME is received from `after-make-frame-functions'."
   :ensure t
   :config
   (setq magit-completing-read-function 'ivy-completing-read))
+
+(use-package forge
+  :ensure t
+  :after magit)
 
 (use-package winum
   :ensure t
