@@ -28,13 +28,11 @@
 (defun add-to-load-path (dir) (add-to-list 'load-path dir))
 
 (defun disable-ui ()
-  (progn
-    (menu-bar-mode -1)
-    (toggle-scroll-bar -1)
-    (tool-bar-mode -1)
-    (scroll-bar-mode -1)
-    (tooltip-mode -1)
-    (setq initial-scratch-message nil)))
+  (set-scroll-bar-mode nil)
+  (setq menu-bar-mode nil)
+  (tool-bar-mode 0)
+  (setq tooltip-mode nil)
+  (setq initial-scratch-message nil))
 
 (defun configure-startup ()
   (progn
@@ -91,15 +89,16 @@
 
 (defun setup-font ()
   "Setup fonts and enable `variable-pitch-mode'."
-  (set-frame-font "InputCustomMonoCompressed-14" nil t)
-  (add-to-list 'default-frame-alist '(font . "InputCustomMonoCompressed-14"))
-  (set-face-attribute 'variable-pitch nil :font "InputCustomSansCompressed-14")
+  (set-frame-font "InputMonoCondensed-14" nil t)
+  (add-to-list 'default-frame-alist '(font . "InputMonoCondensed-14"))
+  (set-face-attribute 'variable-pitch nil :font "InputSansCompressed-14")
   (add-hook 'text-mode-hook #'variable-pitch-mode)
   (add-hook 'prog-mode-hook #'variable-pitch-mode))
 
 (defun setup-modeline-font ()
-  (set-face-attribute 'mode-line-inactive nil :family "InputCustomMonoCompressed")
-  (set-face-attribute 'mode-line nil :family "InputCustomMonoCompressed"))
+  ;; (set-face-attribute 'mode-line-inactive nil :font "InputMonoCondensed-14")
+  ;; (set-face-attribute 'mode-line nil :font "InputMonoCondensed-14")
+  )
 
 (defun setup-term-font ()
   '(term ((t (:background "#292b2e" :foreground "#b2b2b2" :family "InputCustomMonoCompressed")))))
@@ -204,8 +203,8 @@ FRAME is received from `after-make-frame-functions'."
 (init)
 (if (daemonp)
     (add-hook 'after-make-frame-functions
-              (lambda (frame) (with-selected-frame frame (init-ui))))
-  (add-hook 'after-init-hook (init-ui)))
+              (lambda (frame) (with-selected-frame frame 'init-ui)))
+  (init-ui))
 
 (use-package diminish
   :ensure t)

@@ -35,6 +35,9 @@ Alternatively, you can drag the font files manually to the /User/Library/Fonts 
 
 Alternatively, in recent versions of Windows, you can simply right-click on a font file and choose “Install” from the menu.
 
+### Linux
+
+Create a folder ~/.fonts and move all fonts to that directory. I recommend you copy only the *.ttf files to ~/.fonts, and run `fc-cache -fv`.
 
 ### Using other operating systems:
 

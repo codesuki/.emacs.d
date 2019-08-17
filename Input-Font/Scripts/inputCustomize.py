@@ -8,7 +8,6 @@ import os
 import sys
 import tempfile
 from fontTools.ttLib import TTFont, newTable
-from fontTools.ttLib.xmlImport import importXML
 
 doc = """USAGE: python /path/to/inputCustomize.py [INPUT] [--dest=OUTPUT] [OPTIONS]
 Use this script to customize one or more Input font files.
@@ -125,7 +124,7 @@ class InputModifier(object):
 
         # write the table
         f['name'] = newTable('name')
-        importXML(f, pathToXML)
+        f.importXML(pathToXML)
     
     def changeNames(self, suffix=None):
         # this is a similar process to fourStyleFamily()
@@ -149,7 +148,7 @@ class InputModifier(object):
         
         # write the table
         f['name'] = newTable('name')
-        importXML(f, pathToXML)
+        f.importXML(pathToXML)
 
 
 

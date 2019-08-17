@@ -6,4 +6,9 @@ your fonts with the inputCustomize.py command-line tool found in this package, o
 by re-downloading the fonts at <http://input.fontbureau.com/download>.
 
 
+	Alternates
+		--a=ss
+		--braces=straight
+		--g=ss
+
 	Line Height: 1.2×
