@@ -582,9 +582,7 @@ FRAME is received from `after-make-frame-functions'."
 (use-package magit
   :defer t
   :config
-  (setq magit-completing-read-function 'ivy-completing-read)
-  (setq magit-save-repository-buffers "dontask")
-  (magit-wip-mode))
+  (setq magit-completing-read-function 'ivy-completing-read))
 
 (use-package forge
   :after magit)
