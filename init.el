@@ -705,7 +705,7 @@ FRAME is received from `after-make-frame-functions'."
     (add-hook 'before-save-hook #'gofmt-before-save)
     (add-hook 'go-mode-hook 'subword-mode)
     (add-hook 'go-mode-hook #'lsp)
-    (add-hook 'go-mode-hook 'setup-lsp-keymap)
+    ;(add-hook 'go-mode-hook 'setup-lsp-keymap)
     (add-hook 'go-mode-hook (lambda () (local-set-key (kbd "C-.") #'lsp-find-definition)))
     (add-hook 'go-mode-hook (lambda () (define-key go-mode-map (kbd "C-=") #'go-guru-expand-region)))
     (add-hook 'go-mode-hook (lambda () (add-to-list 'flycheck-disabled-checkers 'go-test)))
@@ -858,6 +858,11 @@ FRAME is received from `after-make-frame-functions'."
 
 (use-package json-mode
   :defer t)
+
+(use-package jsonnet-mode
+  :defer t
+  :config
+  (add-to-list 'auto-mode-alist '("\\.libsonnet\\'" . jsonnet-mode)))
 
 (use-package eslint-fix
   :defer t
