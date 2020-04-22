@@ -9,6 +9,16 @@
 ;; enable debugging
 ;(setq debug-on-error t)
 
+;; run command without deleting output from previous run
+;; (defun shell-command-print-separator ()
+;;   (overlay-put (make-overlay (point-max) (point-max))
+;;                'before-string
+;;                (propertize "!" 'display
+;;                            (list 'left-fringe
+;;                                  'right-triangle))))
+
+;; (advice-add 'shell-command--save-pos-or-erase :after 'shell-command-print-separator)
+
 (setq gc-cons-threshold 402653184 gc-cons-percentage 0.6)
 (add-hook 'emacs-startup-hook
           (lambda ()
