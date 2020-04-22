@@ -20,6 +20,7 @@
 ;; (advice-add 'shell-command--save-pos-or-erase :after 'shell-command-print-separator)
 
 (setq gc-cons-threshold 402653184 gc-cons-percentage 0.6)
+(setq read-process-output-max (* 1024 1024))
 (add-hook 'emacs-startup-hook
           (lambda ()
             (setq gc-cons-threshold 100000000
