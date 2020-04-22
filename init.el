@@ -364,7 +364,15 @@ FRAME is received from `after-make-frame-functions'."
   (purpose-mode)
   (require 'window-purpose-x)
   (purpose-x-golden-ratio-setup)
-  (purpose-x-popwin-setup))
+  (purpose-x-popwin-setup)
+  (add-to-list 'purpose-special-action-sequences
+               '(edit purpose-display-maybe-same-window
+                      purpose-display-reuse-window-buffer
+                      purpose-display-reuse-window-purpose
+                      purpose-display-maybe-other-window
+                      purpose-display-maybe-other-frame
+                      purpose-display-maybe-pop-up-window
+                      purpose-display-maybe-pop-up-frame)))
 
 (use-package paradox
   :defer t
