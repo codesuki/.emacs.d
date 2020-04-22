@@ -147,6 +147,8 @@
     (prefer-coding-system 'utf-8)
     (setq-default fill-column 80)
     (setq-default indent-tabs-mode nil)
+    (setq-default show-trailing-whitespace 't)
+    (setq-default indicate-empty-lines 't)
     (setq save-interprogram-paste-before-kill t)
     (setq-default sentence-end-double-space nil)
     (setq column-number-mode t)
