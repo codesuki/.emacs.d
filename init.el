@@ -114,11 +114,12 @@
 
 (defun setup-font ()
   "Setup fonts and enable `variable-pitch-mode'."
-  (set-frame-font "InputMonoCondensed-14" nil t)
+  ;;(set-frame-font "InputMonoCondensed-14" nil t)
   (add-to-list 'default-frame-alist '(font . "InputMonoCondensed-14"))
   (set-face-attribute 'variable-pitch nil :font "InputSansCompressed-14")
   (add-hook 'text-mode-hook #'variable-pitch-mode)
-  (add-hook 'prog-mode-hook #'variable-pitch-mode))
+  (add-hook 'prog-mode-hook #'variable-pitch-mode)
+  (add-hook 'protobuf-mode-hook #'variable-pitch-mode))
 
 (defun setup-modeline-font ()
   ;; (set-face-attribute 'mode-line-inactive nil :font "InputMonoCondensed-14")
