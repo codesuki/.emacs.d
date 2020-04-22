@@ -494,10 +494,12 @@ FRAME is received from `after-make-frame-functions'."
 
 (use-package doom-modeline
   :config
+  (setq inhibit-compacting-font-caches t)
   (setq doom-modeline-buffer-file-name-style 'truncate-with-project)
+  (setq doom-modeline-github t)
+  (setq doom-modeline-github-interval (* 1 60))
   (setq doom-modeline-major-mode-color-icon nil)
   (setq doom-modeline-minor-modes nil)
-  (setq doom-modeline-github t)
   (setq doom-modeline-buffer-encoding nil)
   (setq doom-modeline-env-version nil)
   (doom-modeline-mode))
