@@ -921,6 +921,13 @@ FRAME is received from `after-make-frame-functions'."
   (progn
     (setq guru-warn-only t)))
 
+(use-package nand2tetris
+  :disabled t
+  :defer t
+  :config
+  (add-to-list 'auto-mode-alist '("\\.hdl\\'" . nand2tetris-mode))
+  (setq nand2tetris-core-base-dir "~/Development/nand2tetris"))
+
 ;; old packages
 
 ;; (use-package flx-ido
