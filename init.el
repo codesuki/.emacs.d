@@ -26,15 +26,29 @@
             (setq gc-cons-threshold 100000000
                   gc-cons-percentage 0.1)))
 
-(require 'package)
-(add-to-list 'package-archives '("melpa" . "http://melpa.org/packages/"))
-;;(add-to-list 'package-archives '("melpa-stable" . "http://stable.melpa.org/packages/"))
-(package-initialize)
+(setq straight-use-package-by-default t)
+(defvar bootstrap-version)
+(let ((bootstrap-file
+       (expand-file-name "straight/repos/straight.el/bootstrap.el" user-emacs-directory))
+      (bootstrap-version 5))
+  (unless (file-exists-p bootstrap-file)
+    (with-current-buffer
+        (url-retrieve-synchronously
+         "https://raw.githubusercontent.com/raxod502/straight.el/develop/install.el"
+         'silent 'inhibit-cookies)
+      (goto-char (point-max))
+      (eval-print-last-sexp)))
+  (load bootstrap-file nil 'nomessage))
 
-(unless (package-installed-p 'use-package)
-  (package-refresh-contents)
-  (package-install 'use-package))
-(eval-when-compile (require 'use-package))
+;; (require 'package)
+;; (add-to-list 'package-archives '("melpa" . "http://melpa.org/packages/"))
+;; ;;(add-to-list 'package-archives '("melpa-stable" . "http://stable.melpa.org/packages/"))
+;; (package-initialize)
+
+;; (unless (package-installed-p 'use-package)
+;;   (package-refresh-contents)
+;;   (package-install 'use-package))
+;; (eval-when-compile (require 'use-package))
 
 (defun add-to-load-path (dir) (add-to-list 'load-path dir))
 
@@ -228,14 +242,16 @@ FRAME is received from `after-make-frame-functions'."
               (lambda (frame) (with-selected-frame frame 'init-ui)))
   (init-ui))
 
+(straight-use-package 'use-package)
+
+(use-package el-patch)
+
 (use-package auto-compile
-  :ensure t
   :config
   (auto-compile-on-load-mode)
   (auto-compile-on-save-mode))
 
-(use-package diminish
-  :ensure t)
+(use-package diminish)
 
 (use-package electric
   :config
@@ -272,12 +288,14 @@ FRAME is received from `after-make-frame-functions'."
   (add-hook 'emacs-lisp-mode-hook 'eldoc-mode))
 
 (use-package mwheel
+  :straight nil
   :config
   (progn
     (setq mouse-wheel-progressive-speed nil)
     (setq mouse-wheel-scroll-amount '(2 ((shift) . 1) ((control) . nil)))))
 
-(use-package dired-x)
+(use-package dired-x
+  :straight nil)
 
 (use-package ibuffer
   :config
@@ -285,6 +303,7 @@ FRAME is received from `after-make-frame-functions'."
     (defalias 'list-buffers 'ibuffer)))
 
 (use-package abbrev
+  :straight nil
   :diminish)
 
 (use-package recentf
@@ -292,7 +311,6 @@ FRAME is received from `after-make-frame-functions'."
   (recentf-mode))
 
 (use-package whitespace
-  :ensure t
   :diminish (global-whitespace-mode . " Ⓦ")
   :diminish (whitespace-mode . " ⓦ")
   :config
@@ -300,21 +318,21 @@ FRAME is received from `after-make-frame-functions'."
     (setq whitespace-line-column 80)
     (add-hook 'before-save-hook 'whitespace-cleanup)))
 
-(use-package gnutls
-  :ensure t)
+(use-package gnutls)
+
+(use-package gcmh
+  :config
+  (gcmh-mode))
 
 (use-package winner
-  :ensure t
   :config
   (winner-mode))
 
-(use-package imenu-list
-  :ensure t)
+(use-package imenu-list)
 
 (use-package window-purpose
   :after imenu-list
-  :load-path "~/Development/emacs-purpose"
-  ;; :ensure t
+  :straight (window-purpose :fork (:host github :repo "codesuki/emacs-purpose" :branch "counsel"))
   :config
   (setq purpose-default-action-order 'prefer-same-window)
   ;; (add-to-list 'purpose-user-mode-purposes
@@ -327,18 +345,16 @@ FRAME is received from `after-make-frame-functions'."
   (purpose-x-popwin-setup))
 
 (use-package paradox
-  :ensure t
+  :defer t
   :config
   (progn
     (paradox-enable)))
 
 (use-package amx
-  :ensure t
   :config
   (amx-initialize))
 
-(use-package flx
-  :ensure t)
+(use-package flx)
 
 ;; https://github.com/abo-abo/swiper/issues/2052
 (defun my-ivy-kill-current ()
@@ -347,7 +363,6 @@ FRAME is received from `after-make-frame-functions'."
   (kill-new (ivy-state-current ivy-last)))
 
 (use-package ivy
-  :ensure t
   :after amx
   :config
   (setq enable-recursive-minibuffers t)
@@ -363,7 +378,6 @@ FRAME is received from `after-make-frame-functions'."
   (define-key ivy-minibuffer-map (kbd "M-w") #'my-ivy-kill-current))
 
 (use-package counsel
-  :ensure t
   :config
   (counsel-mode)
   (global-set-key (kbd "M-x") 'counsel-M-x)
@@ -377,23 +391,21 @@ FRAME is received from `after-make-frame-functions'."
   (global-set-key (kbd "<f2> u") 'counsel-unicode-char))
 
 (use-package swiper
-  :ensure t
+  :defer t
   :config
   (global-set-key (kbd "C-s") 'swiper))
 
 (use-package hungry-delete
-  :ensure t
   :diminish hungry-delete-mode
   :config
   (global-hungry-delete-mode))
 
 (use-package move-text
-  :ensure t
+  :defer t
   :config
   (move-text-default-bindings))
 
 (use-package expand-region
-  :ensure t
   :bind ("C-=" . er/expand-region)
   :config
   (require 'subword-mode-expansions)
@@ -401,13 +413,11 @@ FRAME is received from `after-make-frame-functions'."
   (er/enable-mode-expansions 'go-mode 'er/add-cc-mode-expansions))
 
 (use-package multiple-cursors
-  :ensure t
   :bind (("C-;" . mc/mark-all-like-this)
          ("C->" . mc/mark-next-like-this)
          ("C-<" . mc/mark-previous-like-this)))
 
 (use-package avy
-  :ensure t
   :bind (("C-\"" . avy-move-region)
          ("C-:" . avy-kill-region)
          ("C-'" . avy-goto-char-timer)
@@ -417,27 +427,21 @@ FRAME is received from `after-make-frame-functions'."
   (avy-setup-default))
 
 (use-package ace-window
-  :ensure t
   :bind ("M-o" . ace-window))
 
 (use-package ace-link
-  :ensure t
   :config
   (ace-link-setup-default))
 
 (use-package browse-kill-ring
   :disabled t
-  :ensure t
   :config
   (browse-kill-ring-default-keybindings))
 
 (use-package rainbow-delimiters
-  :ensure t
-  :config
-  (add-hook 'lisp-mode-hook #'rainbow-delimiters-mode))
+  :hook (lisp-mode . rainbow-delimiters-mode))
 
 (use-package anzu
-  :ensure t
   :diminish anzu-mode
   :config
   (progn
@@ -451,7 +455,6 @@ FRAME is received from `after-make-frame-functions'."
   (kaolin-treemacs-theme))
 
 (use-package doom-themes
-  :ensure t
   :config
   (setq doom-themes-enable-bold t)
   (setq doom-themes-enable-italic t)
@@ -460,7 +463,6 @@ FRAME is received from `after-make-frame-functions'."
   (load-theme 'doom-one t))
 
 (use-package doom-modeline
-  :ensure t
   :config
   (setq doom-modeline-buffer-file-name-style 'truncate-with-project)
   (setq doom-modeline-major-mode-color-icon nil)
@@ -471,7 +473,6 @@ FRAME is received from `after-make-frame-functions'."
   (doom-modeline-mode))
 
 (use-package treemacs
-  :ensure t
   :defer t
   :init
   (with-eval-after-load 'winum
@@ -501,20 +502,16 @@ FRAME is received from `after-make-frame-functions'."
         ("C-x t M-t" . treemacs-find-tag)))
 
 (use-package treemacs-projectile
-  :after treemacs projectile
-  :ensure t)
+  :after treemacs projectile)
 
 (use-package treemacs-icons-dired
   :after treemacs dired
-  :ensure t
   :config (treemacs-icons-dired-mode))
 
 (use-package treemacs-magit
-  :after treemacs magit
-  :ensure t)
+  :after treemacs magit)
 
 (use-package git-gutter
-  :ensure t
   :diminish git-gutter-mode
   :defer 2
   :config
@@ -522,10 +519,9 @@ FRAME is received from `after-make-frame-functions'."
   (global-git-gutter-mode))
 
 (use-package ripgrep
-  :ensure t)
+  :defer t)
 
 (use-package projectile
-  :ensure t
   :config
   (projectile-mode)
   (define-key projectile-mode-map (kbd "C-c p") 'projectile-command-map)
@@ -536,42 +532,37 @@ FRAME is received from `after-make-frame-functions'."
                   "*vendor"))))
 
 (use-package exec-path-from-shell
-  :ensure t
   :config
   (progn
     (exec-path-from-shell-copy-env "GOPATH")
     (exec-path-from-shell-copy-env "PATH")))
 
-(use-package smartparens
-  :ensure t)
+(use-package smartparens)
 
 (use-package editorconfig
-  :ensure t
   :diminish (editorconfig-mode . " ⓔ")
   :config
   (editorconfig-mode))
 
 (use-package restclient
-  :ensure t)
+  :defer t)
 
 (use-package magit
-  :ensure t
+  :defer t
   :config
   (setq magit-completing-read-function 'ivy-completing-read)
   (setq magit-save-repository-buffers "dontask")
   (magit-wip-mode))
 
 (use-package forge
-  :ensure t
   :after magit)
 
 (use-package winum
-  :ensure t
+  :defer t
   :config
   (winum-mode))
 
 (use-package golden-ratio
-  :ensure t
   :diminish (golden-ratio-mode . " ⓖ")
   :config
   (progn
@@ -589,30 +580,27 @@ FRAME is received from `after-make-frame-functions'."
                     avy-goto-char-timer)))))
 
 (use-package smooth-scrolling
-  :ensure t
   :config
   (smooth-scrolling-mode))
 
 (use-package rainbow-mode
-  :ensure t
   :diminish rainbow-mode
   :config
   (rainbow-mode))
 
 (use-package yasnippet
-  :ensure t
-  :defer t
-  :diminish yas-minor-mode)
+  :diminish yas-minor-mode
+  :config
+  (yas-global-mode))
 
 (use-package flycheck
-  :ensure t
+  :defer 2
   :diminish (flycheck-mode . " ⓢ")
   :config
   (global-flycheck-mode)
   (setq flycheck-go-golint-executable "golint"))
 
 (use-package flycheck-package
-  :ensure t
   :config
   (flycheck-package-setup))
 
@@ -627,7 +615,7 @@ FRAME is received from `after-make-frame-functions'."
 ;;   :next-checkers 'protobuf-protoc)
 
 (use-package company
-  :ensure t
+  :defer 2
   :diminish (company-mode . " ⓐ")
   :bind (:map company-search-map
               ("C-n" . company-select-next)
@@ -639,49 +627,47 @@ FRAME is received from `after-make-frame-functions'."
   (global-company-mode)
   (setq company-dabbrev-downcase nil))
 
-(defun setup-lsp-keymap ()
-  "Add a keymap to go-mode for lsp commands."
-  (let ((m (define-prefix-command 'go-lsp-map)))
-    (define-key m "d" #'lsp-find-declaration)
-    (define-key m "r" #'lsp-find-references)
-    (define-key m "t" #'lsp-find-type-definition))
+;; (defun setup-lsp-keymap ()
+;;   "Add a keymap to go-mode for lsp commands."
+;;   (let ((m (define-prefix-command 'go-lsp-map)))
+;;     (define-key m "d" #'lsp-find-declaration)
+;;     (define-key m "r" #'lsp-find-references)
+;;     (define-key m "t" #'lsp-find-type-definition))
 
-  (define-key go-mode-map (kbd "C-c C-l") 'go-lsp-map))
+;;   (define-key go-mode-map (kbd "C-c C-l") 'go-lsp-map))
 
 (use-package lsp-mode
-  :ensure t
+  :defer t
+  :init (setq lsp-keymap-prefix "C-c C-l")
   :commands lsp
+  :hook ((lsp-mode . lsp-enable-which-key-integration))
   :config
   (setq lsp-symbol-highlighting-skip-current t)
   (setq lsp-enable-links nil)
-  (setq lsp-eldoc-render-all t))
+  (setq lsp-eldoc-render-all t)
+  (setq lsp-prefer-capf t))
 
 (use-package lsp-ui
-  :disabled t
-  :ensure t
-  :commands lsp-ui-mode)
-
-(use-package company-lsp
-  :ensure t
-  :commands company-lsp)
+  :defer t
+  :commands lsp-ui-mode
+  :config
+  (setq lsp-ui-doc-enable nil))
 
 (use-package dockerfile-mode
-  :ensure t)
+  :defer t)
 
 (use-package nasm-mode
-  :ensure t
+  :defer t
   :config
   (add-to-list 'auto-mode-alist '("\\.s\\'" . nasm-mode)))
 
 (use-package bazel-mode
-  :ensure
-  ;;:load-path "bazel-mode/"
+  :defer t
   :config
   (progn
     (add-hook 'bazel-mode-hook (lambda () (add-hook 'before-save-hook #'bazel-format nil t)))))
 
 (use-package go-mode
-  :ensure t
   :defer t
   :config
   (progn
@@ -699,33 +685,24 @@ FRAME is received from `after-make-frame-functions'."
     (add-hook 'go-mode-hook (lambda () (add-to-list 'flycheck-disabled-checkers 'go-staticcheck)))))
 
 (use-package go-guru
-  :ensure t
-  :config
-  (add-hook 'go-mode-hook #'go-guru-hl-identifier-mode))
+  :hook (go-mode . go-guru-hl-identifier-mode))
 
 (use-package go-add-tags
-  :ensure t
+  :defer t
   :config
   (with-eval-after-load 'go-mode
     (define-key go-mode-map (kbd "C-c t") #'go-add-tags)))
 
 (use-package gotest
-  :ensure t)
+  :defer t)
 
 (use-package go-rename
-  :ensure t)
-
-(use-package company-go
-  :disabled t
-  :ensure t
-  :config
-  (eval-after-load 'company '(add-to-list 'company-backends 'company-go)))
+  :defer t)
 
 (use-package protobuf-mode
-  :ensure t)
+  :defer t)
 
 (use-package anaconda-mode
-  :ensure t
   :defer t
   :config
   (progn
@@ -733,15 +710,15 @@ FRAME is received from `after-make-frame-functions'."
     (add-hook 'python-mode-hook 'anaconda-eldoc-mode)))
 
 (use-package company-anaconda
-  :ensure t
+  :defer t
   :config
   (eval-after-load "company" '(add-to-list 'company-backends 'company-anaconda)))
 
 (use-package yaml-mode
-  :ensure t)
+  :defer t)
 
 (use-package ensime
-  :ensure t
+  :defer t
 ;;  :pin melpa-stable
   :init
   (setq ensime-startup-snapshot-notification nil)
@@ -750,7 +727,7 @@ FRAME is received from `after-make-frame-functions'."
     '(define-key ensime-mode-map (kbd "M-p") nil)))
 
 (use-package sbt-mode
-  :ensure t)
+  :defer t)
 
 (defun setup-c-clang-options ()
   (setq irony-additional-clang-options (quote ("-std=c11"))))
@@ -759,37 +736,32 @@ FRAME is received from `after-make-frame-functions'."
   (setq irony-additional-clang-options (quote ("-std=c++14" "-stdlib=libc++"))))
 
 (use-package irony
-  :ensure t
-  :init
-  (progn
-    (add-hook 'c++-mode-hook 'irony-mode)
-    (add-hook 'c-mode-hook 'irony-mode)
-    (add-hook 'objc-mode-hook 'irony-mode))
+  :hook (c++-mode c-mode objc-mode)
   :config
   (progn
     (add-hook 'c++-mode-hook 'setup-cpp-clang-options)
     (add-hook 'c-mode-hook 'setup-c-clang-options)))
 
 (use-package company-irony
-  :ensure t
+  :defer t
   :config
   (progn
     (eval-after-load 'company '(add-to-list 'company-backends 'company-irony))
     (add-hook 'irony-mode-hook 'company-irony-setup-begin-commands)))
 
 (use-package flycheck-irony
-  :ensure t
+  :defer t
   :config
   (eval-after-load 'flycheck
       '(add-hook 'flycheck-mode-hook #'flycheck-irony-setup)))
 
 (use-package company-c-headers
-  :ensure t
+  :defer t
   :config
   (add-to-list 'company-backends 'company-c-headers))
 
 (use-package clang-format
-  :ensure t
+  :defer t
   :config
   (progn
     (setq clang-format-style "llvm")
@@ -797,7 +769,6 @@ FRAME is received from `after-make-frame-functions'."
     (add-hook 'c-mode-hook (lambda () (add-hook 'before-save-hook 'clang-format-buffer nil t)))))
 
 (use-package google-c-style
-  :ensure t
   :defer t
   :config
   (progn
@@ -807,6 +778,7 @@ FRAME is received from `after-make-frame-functions'."
     (add-hook 'c++-mode-hook 'google-make-newline-indent)))
 
 (use-package js
+  :defer t
   :config
   (setq js-indent-level 2))
 
@@ -814,7 +786,7 @@ FRAME is received from `after-make-frame-functions'."
   (setq-local sgml-basic-offset js2-basic-offset))
 
 (use-package js2-mode
-  :ensure t
+  :defer t
   :config
   (progn
     (add-to-list 'auto-mode-alist '("\\.js\\'" . js2-mode))
@@ -836,10 +808,10 @@ FRAME is received from `after-make-frame-functions'."
       '(add-hook 'typescript-mode-hook #'add-node-modules-path))))
 
 (use-package typescript-mode
-  :ensure t)
+  :defer t)
 
 (use-package tide
-  :ensure t
+  :defer t
   :diminish tide-mode
   :config
   (progn
@@ -855,16 +827,16 @@ FRAME is received from `after-make-frame-functions'."
                     (flycheck-add-mode 'typescript-tide 'web-mode)))))))
 
 (use-package json-mode
-  :ensure t)
+  :defer t)
 
 (use-package eslint-fix
-  :ensure t
+  :defer t
   :config
   (eval-after-load 'js2-mode
     '(add-hook 'js2-mode-hook '(add-hook 'before-save-hook 'eslint-fix nil t))))
 
 (use-package web-mode
-  :ensure t
+  :defer t
   ;:mode ("\\.html?\\'" . web-mode)
   :config
   (progn
@@ -872,54 +844,52 @@ FRAME is received from `after-make-frame-functions'."
     (add-to-list 'auto-mode-alist '("\\.tsx\\'" . web-mode))))
 
 (use-package emmet-mode
-  :ensure t
+  :defer t
   :config
   (add-hook 'web-mode-hook 'emmet-mode)
   (add-hook 'css-mode-hook 'emmet-mode))
 
 (use-package markdown-mode
-  :ensure t)
+  :defer t)
 
 (use-package terraform-mode
-  :ensure t
+  :defer t
   :config
   (add-hook 'terraform-mode-hook #'terraform-format-on-save-mode))
 
 (use-package swift-mode
-  :ensure t)
+  :defer t)
 
 (use-package flycheck-swift3
-  :ensure t
+  :defer t
   :config
   (with-eval-after-load 'flycheck
     (add-hook 'flycheck-mode-hook #'flycheck-swift3-setup)))
 
 (use-package flycheck-objc-clang
-  :ensure t
+  :defer t
   :config
   (with-eval-after-load 'flycheck
     (add-hook 'flycheck-mode-hook #'flycheck-objc-clang-setup)))
 
 (use-package which-key
-  :ensure t
+  :defer 2
   :diminish (which-key-mode . " Ⓚ")
   :config
   (progn
     (which-key-mode)))
 
 (use-package guru-mode
-  :ensure t
   :diminish guru-mode
+  :hook (prog-mode)
   :config
   (progn
-    (add-hook 'prog-mode-hook 'guru-mode)
     (setq guru-warn-only t)))
 
 ;; old packages
 
 ;; (use-package flx-ido
 ;;   :disabled t
-;;   :ensure t
 ;;   :config
 ;;   (progn
 ;;     (flx-ido-mode)
@@ -928,13 +898,11 @@ FRAME is received from `after-make-frame-functions'."
 
 ;; ;; switch to rg
 ;; (use-package ag
-;;   :disabled t
-;;   :ensure t)
+;;   :disabled t)
 
 ;; ;; switch to treemacs
 ;; (use-package neotree
 ;;   :disabled t
-;;   :ensure t
 ;;   :config
 ;;   (setq neo-theme (if (display-graphic-p) 'icons 'arrow))
 ;;   (setq neo-window-width 40))
@@ -942,7 +910,6 @@ FRAME is received from `after-make-frame-functions'."
 ;; (use-package selectric-mode
 ;;   :disabled t
 ;;   :load-path "selectric-mode/"
-;;   :ensure t
 ;;   :diminish (selectric-mode . "♬")
 ;;   :config
 ;;   (selectric-mode))
@@ -950,33 +917,28 @@ FRAME is received from `after-make-frame-functions'."
 ;; ;; just use show-paren-mode
 ;; (use-package highlight-parentheses
 ;;   :disabled t
-;;   :ensure t
 ;;   :diminish highlight-parentheses-mode
 ;;   :init
 ;;   (add-hook 'prog-mode-hook #'highlight-parentheses-mode))
 
 ;; (use-package highlight-symbol
 ;;   :disabled t
-;;   :ensure t
 ;;   :config
 ;;   (highlight-symbol-mode))
 
 ;; (use-package highlight-indentation
 ;;   :disabled t
-;;   :ensure t
 ;;   :config
 ;;   (highlight-indentation-mode))
 
 ;; (use-package indent-guide
 ;;   :disabled t
-;;   :ensure t
 ;;   :diminish indent-guide-mode
 ;;   :config
 ;;   (indent-guide-global-mode))
 
 ;; (use-package centered-cursor-mode
 ;;   :disabled t
-;;   :ensure t
 ;;   :diminish (centered-cursor-mode . " ⊝")
 ;;   :config
 ;;   (progn
@@ -989,37 +951,31 @@ FRAME is received from `after-make-frame-functions'."
 
 ;; (use-package diff-hl
 ;;   :disabled t
-;;   :ensure t
 ;;   :config
 ;;   (global-diff-hl-mode))
 
 ;; (use-package fill-column-indicator
 ;;   :disabled t
-;;   :ensure t
 ;;   :defer 2
 ;;   :config
 ;;   (fci-mode))
 
 ;; (use-package iedit
 ;;   :disabled true
-;;   :ensure t
 ;;   :bind ("C-;" . iedit-mode))
 
 ;; (use-package flatui-theme
 ;;   :disabled t
-;;   :ensure t
 ;;   :defer t
 ;;   :config
 ;;   (setup-flat-ui))
 
 ;; (use-package dracula-theme
 ;;   :disabled t
-;;   :ensure t
 ;;   :defer t)
 
 ;; (use-package spacemacs-common
-;;   :disabled t
-;;   :ensure spacemacs-theme
+;;   :disabled t)
 ;;   :config
 ;;   (if (daemonp)
 ;;       (add-hook 'after-make-frame-functions
@@ -1044,7 +1000,6 @@ FRAME is received from `after-make-frame-functions'."
 
 ;; (use-package spaceline
 ;;   :disabled t
-;;   :ensure t
 ;;   :demand t
 ;;   :config
 ;;   (if (daemonp)
@@ -1055,7 +1010,6 @@ FRAME is received from `after-make-frame-functions'."
 
 ;; (use-package spaceline-all-the-icons
 ;;   :disabled t
-;;   :ensure t
 ;;   :after spaceline
 ;;   :config
 ;;   (setq spaceline-all-the-icons-clock-always-visible nil)
