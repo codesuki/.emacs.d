@@ -681,13 +681,22 @@ FRAME is received from `after-make-frame-functions'."
   (setq lsp-symbol-highlighting-skip-current t)
   (setq lsp-enable-links nil)
   (setq lsp-eldoc-render-all t)
-  (setq lsp-prefer-capf t))
+  (setq lsp-prefer-capf t)
+  (setq lsp-headerline-breadcrumb-enable nil)
+  (setq lsp-enable-file-watchers nil)
+  (add-to-list 'lsp-file-watch-ignored-directories "[/\\\\]bazel-.*\\'")
+  (add-to-list 'lsp-file-watch-ignored-directories "[/\\\\]docs\\'")
+  (add-to-list 'lsp-file-watch-ignored-directories "[/\\\\]web\\'"))
 
 (use-package lsp-ui
   :defer t
   :commands lsp-ui-mode
   :config
   (setq lsp-ui-doc-enable nil))
+
+(use-package lsp-java
+  :defer t
+  :hook ((java-mode . lsp)))
 
 (use-package dockerfile-mode
   :defer t)
