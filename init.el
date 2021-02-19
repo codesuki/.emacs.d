@@ -423,6 +423,7 @@ FRAME is received from `after-make-frame-functions'."
 (use-package hungry-delete
   :diminish hungry-delete-mode
   :config
+  (add-hook 'minibuffer-setup-hook (lambda () (hungry-delete-mode -1)))
   (global-hungry-delete-mode))
 
 (use-package move-text
