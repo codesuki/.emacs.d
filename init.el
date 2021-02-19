@@ -563,6 +563,11 @@ FRAME is received from `after-make-frame-functions'."
                 '("*.terraform"
                   "*vendor"))))
 
+(use-package counsel-projectile
+  :config
+  (setcar (nthcdr 0 counsel-projectile-switch-project-action) 2)
+  (counsel-projectile-mode))
+
 (use-package exec-path-from-shell
   :config
   (progn
