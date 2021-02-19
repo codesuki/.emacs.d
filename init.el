@@ -210,22 +210,17 @@
         '(macos-keychain-internet)))
 
 (defun setup-better-capitalize-word ()
+  "From https://oremacs.com/2014/12/23/upcase-word-you-silly/."
   (defadvice capitalize-word (before capitalize-word-advice activate)
-  (unless (or (looking-back "\\b")
-              (bound-and-true-p subword-mode))
-    (backward-word))))
-
-(defadvice upcase-word (before upcase-word-advice activate)
-  (unless (looking-back "\\b")
-    (backward-word)))
-
-(defadvice downcase-word (before downcase-word-advice activate)
-  (unless (looking-back "\\b")
-    (backward-word)))
-
-(defadvice capitalize-word (before capitalize-word-advice activate)
-  (unless (looking-back "\\b")
-    (backward-word)))
+    (unless (or (looking-back "\\b")
+                (bound-and-true-p subword-mode))
+      (backward-word)))
+  (defadvice upcase-word (before upcase-word-advice activate)
+    (unless (looking-back "\\b")
+      (backward-word)))
+  (defadvice downcase-word (before downcase-word-advice activate)
+    (unless (looking-back "\\b")
+      (backward-word))))
 
 (defun init ()
   "Init shared settings."
@@ -238,7 +233,7 @@
   (setup-window-splitting)
   (setup-move-beginning-of-line-or-indent)
   (setup-auth)
-  ;;(setup-better-capitalize-word)
+  (setup-better-capitalize-word)
   (global-set-key (kbd "M-z") 'zap-up-to-char)
   (global-set-key (kbd "C-?") 'help-command)
   (define-key key-translation-map (kbd "C-h") (kbd "<DEL>")))
