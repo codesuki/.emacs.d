@@ -712,15 +712,22 @@ FRAME is received from `after-make-frame-functions'."
   (progn
     (add-hook 'bazel-mode-hook (lambda () (add-hook 'before-save-hook #'bazel-format nil t)))))
 
+;; Set up before-save hooks to format buffer and add/delete imports.
+;; Make sure you don't have other gofmt/goimports hooks enabled.
+(defun lsp-go-install-save-hooks ()
+  (add-hook 'before-save-hook #'lsp-format-buffer t t)
+  (add-hook 'before-save-hook #'lsp-organize-imports t t))
+
 (use-package go-mode
   :defer t
   :config
   (progn
     (setq gofmt-command "goimports")
-    (add-hook 'before-save-hook #'gofmt-before-save)
+    ;;(add-hook 'before-save-hook #'gofmt-before-save)
     (add-hook 'go-mode-hook 'subword-mode)
-    (add-hook 'go-mode-hook #'lsp)
-    ;(add-hook 'go-mode-hook 'setup-lsp-keymap)
+    (add-hook 'go-mode-hook #'lsp-deferred)
+    (add-hook 'go-mode-hook #'lsp-go-install-save-hooks)
+    ;;(add-hook 'go-mode-hook 'setup-lsp-keymap)
     (add-hook 'go-mode-hook (lambda () (local-set-key (kbd "C-.") #'lsp-find-definition)))
     (add-hook 'go-mode-hook (lambda () (define-key go-mode-map (kbd "C-=") #'go-guru-expand-region)))
     (add-hook 'go-mode-hook (lambda () (add-to-list 'flycheck-disabled-checkers 'go-test)))
