@@ -500,6 +500,10 @@ FRAME is received from `after-make-frame-functions'."
   (setq doom-modeline-env-version nil)
   (doom-modeline-mode))
 
+(use-package highlight-indent-guides
+  :config
+  (add-hook 'yaml-mode-hook 'highlight-indent-guides-mode))
+
 (use-package treemacs
   :defer t
   :init
