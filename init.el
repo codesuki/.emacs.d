@@ -571,8 +571,9 @@ FRAME is received from `after-make-frame-functions'."
 (use-package exec-path-from-shell
   :config
   (progn
-    (exec-path-from-shell-copy-env "GOPATH")
-    (exec-path-from-shell-copy-env "PATH")))
+    (setq exec-path-from-shell-variables '("GOPATH" "PATH" "MANPATH"))
+    (setq exec-path-from-shell-arguments nil)
+    (exec-path-from-shell-initialize)))
 
 (use-package smartparens)
 
