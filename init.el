@@ -750,8 +750,7 @@ FRAME is received from `after-make-frame-functions'."
     (add-hook 'go-mode-hook (lambda () (add-to-list 'flycheck-disabled-checkers 'go-megacheck)))
     (add-hook 'go-mode-hook (lambda () (add-to-list 'flycheck-disabled-checkers 'go-staticcheck)))))
 
-(use-package go-guru
-  :hook (go-mode . go-guru-hl-identifier-mode))
+(use-package go-guru)
 
 (use-package go-add-tags
   :defer t
