@@ -431,7 +431,6 @@ FRAME is received from `after-make-frame-functions'."
   (global-hungry-delete-mode))
 
 (use-package move-text
-  :defer t
   :config
   (move-text-default-bindings))
 
