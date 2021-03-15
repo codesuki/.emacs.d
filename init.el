@@ -560,6 +560,9 @@ FRAME is received from `after-make-frame-functions'."
   (setq git-gutter:window-width 2)
   (global-git-gutter-mode))
 
+(use-package git-timemachine
+  :defer t)
+
 (use-package ripgrep
   :defer t)
 
