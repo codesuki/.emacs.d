@@ -434,12 +434,19 @@ FRAME is received from `after-make-frame-functions'."
   :config
   (move-text-default-bindings))
 
+(defun er/add-go-mode-expansions ()
+  "Adds Go-specific expansions for buffers in go-mode"
+  (set (make-local-variable 'er/try-expand-list) (append
+                                                  '(go-guru-expand-region)
+                                                  er/try-expand-list)))
+
 (use-package expand-region
   :bind ("C-=" . er/expand-region)
   :config
   (require 'subword-mode-expansions)
   (er/enable-mode-expansions 'bazel-mode 'er/add-python-mode-expansions)
-  (er/enable-mode-expansions 'go-mode 'er/add-cc-mode-expansions))
+  ;;  (er/enable-mode-expansions 'go-mode 'er/add-cc-mode-expansions))
+  (er/enable-mode-expansions 'go-mode 'er/add-go-mode-expansions))
 
 (use-package multiple-cursors
   :bind (("C-;" . mc/mark-all-like-this)
@@ -732,7 +739,8 @@ FRAME is received from `after-make-frame-functions'."
     (add-hook 'go-mode-hook #'lsp-go-install-save-hooks)
     ;;(add-hook 'go-mode-hook 'setup-lsp-keymap)
     (add-hook 'go-mode-hook (lambda () (local-set-key (kbd "C-.") #'lsp-find-definition)))
-    (add-hook 'go-mode-hook (lambda () (define-key go-mode-map (kbd "C-=") #'go-guru-expand-region)))
+    (add-hook 'go-mode-hook (lambda () (local-set-key (kbd "C-,") #'xref-pop-marker-stack)))
+    ;;(add-hook 'go-mode-hook (lambda () (define-key go-mode-map (kbd "C-=") #'go-guru-expand-region)))
     (add-hook 'go-mode-hook (lambda () (add-to-list 'flycheck-disabled-checkers 'go-test)))
     (add-hook 'go-mode-hook (lambda () (add-to-list 'flycheck-disabled-checkers 'go-vet)))
     (add-hook 'go-mode-hook (lambda () (add-to-list 'flycheck-disabled-checkers 'go-build)))
