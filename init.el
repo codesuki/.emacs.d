@@ -420,6 +420,10 @@ FRAME is received from `after-make-frame-functions'."
   :config
   (global-set-key (kbd "C-s") 'swiper))
 
+(use-package goto-chg
+  :config
+  (global-set-key (kbd "C-\\") 'goto-last-change))
+
 (use-package hungry-delete
   :diminish hungry-delete-mode
   :config
