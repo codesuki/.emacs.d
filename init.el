@@ -758,11 +758,13 @@ FRAME is received from `after-make-frame-functions'."
   (with-eval-after-load 'go-mode
     (define-key go-mode-map (kbd "C-c t") #'go-add-tags)))
 
-(use-package gotest
-  :defer t)
+;; lsp-mode can probably soon run tests with code lenses
+;; (use-package gotest
+;;   :defer t)
 
-(use-package go-rename
-  :defer t)
+;; lsp-mode can do this
+;; (use-package go-rename
+;;   :defer t)
 
 (use-package protobuf-mode
   :defer t)
