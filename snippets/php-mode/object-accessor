@@ -1,0 +1,6 @@
+# -*- mode: snippet -*-
+# name: $o->...
+# key: ->
+# uuid: ->
+# --
+\$${1:obj_name}->${2:var}

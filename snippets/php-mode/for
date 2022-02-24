@@ -1,0 +1,8 @@
+# -*- mode: snippet -*-
+# name: for loop
+# key: for
+# uuid: for
+# --
+for ($1;$2;$3) {
+    `%`$0
+}

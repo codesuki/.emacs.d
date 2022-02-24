@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: textbf
+# key: b
+# uuid: b
+# condition: (not (save-restriction (widen) (texmathp)))
+# --
+\textbf{`%`$1}$0

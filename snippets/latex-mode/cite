@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: cite
+# key: c
+# uuid: c
+# condition: (not (save-restriction (widen) (texmathp)))
+# --
+\cite{$1} $0

@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: emph
+# key: e
+# uuid: e
+# condition: (not (save-restriction (widen) (texmathp)))
+# --
+\emph{${1:`%`}}$0

@@ -1,0 +1,6 @@
+# -*- mode: snippet -*-
+# name: parent::...
+# key: par
+# uuid: par
+# --
+parent::$0
