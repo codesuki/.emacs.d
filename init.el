@@ -26,7 +26,6 @@
     (message "Native JSON is available")
   (message "Native JSON is *not* available"))
 
-
 (defvar last-file-name-handler-alist file-name-handler-alist)
 (setq gc-cons-threshold 402653184 gc-cons-percentage 0.6 file-name-handler-alist nil)
 (setq read-process-output-max (* 1024 1024))
@@ -41,7 +40,7 @@
 (defun to-local-path (path)
   (expand-file-name (convert-standard-filename path) codesuki-local-dir))
 
-(add-to-list 'native-comp-eln-load-path (to-local-path "eln-cache/"))
+;;(add-to-list 'native-comp-eln-load-path (to-local-path "eln-cache/"))
 
 ;; from doom emacs
 ;; (defadvice! codesuki--write-to-local-path-a (fn &rest args)
@@ -149,9 +148,10 @@
   ;;(add-to-list 'default-frame-alist '(font . "InputMonoCondensed-14"))
   ;;(set-face-attribute 'variable-pitch nil :font "InputSansCompressed-14")
 
-  (add-to-list 'default-frame-alist '(font . "Input Mono Condensed-14"))
-  (set-face-attribute 'fixed-pitch nil :font "Input Mono Condensed-14")
-  (set-face-attribute 'variable-pitch nil :font "Input Sans Compressed-14")
+  ;; (add-to-list 'default-frame-alist '(font . "Input Mono Condensed-14"))
+  (set-face-attribute 'default nil :font "Input Mono Condensed-14" :weight 'medium)
+  (set-face-attribute 'fixed-pitch nil :font "Input Mono Condensed-14" :weight 'medium)
+  (set-face-attribute 'variable-pitch nil :font "Input Sans Compressed-14" :weight 'medium)
   (add-hook 'text-mode-hook #'variable-pitch-mode)
   (add-hook 'prog-mode-hook #'variable-pitch-mode)
   (add-hook 'protobuf-mode-hook #'variable-pitch-mode))
@@ -347,8 +347,9 @@
   (global-set-key (kbd "M-v") 'View-scroll-half-page-backward)
   (global-set-key (kbd "M-z") 'zap-up-to-char)
   (global-set-key (kbd "C-?") 'help-command)
-  ;; (global-set-key (kbd "C-h") 'delete-backward-char)
-  (define-key key-translation-map (kbd "C-h") (kbd "<DEL>")))
+  (global-set-key (kbd "C-h") 'delete-backward-char)
+  ;;(define-key key-translation-map (kbd "C-h") (kbd "<DEL>"))
+  )
 
 (defun init-ui ()
   "Init UI relating settings.
@@ -372,38 +373,46 @@ FRAME is received from `after-make-frame-functions'."
               (lambda (frame) (with-selected-frame frame 'init-ui)))
   (init-ui))
 
-(defvar codesuki/popups nil)
+(defvar codesuki--quit-hook nil)
 
-codesuki/popups
+(defvar codesuki--popups nil)
 
-(defun codesuki/kill-popups ()
-  (let ((window (pop codesuki/popups)))
-    (message "Killing buffer: %s" window)
-    (when window
-      (delete-window window))))
+(defun codesuki-quit ()
+  "`codesuki-quit' executes `codesuki--quit-hook' until one hook
+returns non-nil. If all hooks return nil it executes
+`keyboard-quit'."
+  (interactive)
+  (unless (run-hook-with-args-until-success 'codesuki--quit-hook)
+    (keyboard-quit)))
 
-(codesuki/kill-popups)
-;; works but buffer is still in the background. we don't need to register
-;; windows in codesuki/popups, we can just iterate over all windows if we mark
-;; them.
+(global-set-key (kbd "C-g") 'codesuki-quit)
 
-(setq-local kill-buffer-hook nil)
+;; this function should return nil if nothing is killed t otherwise.
+(defun codesuki--kill-popups ()
+  ;; We should pop after `kill-buffer' returns `t'.
+  (let ((buffer (pop codesuki--popups)))
+    (when buffer
+      ;; `kill-buffer': This function returns `t' if it actually killed the buffer.
+      ;; It returns `nil' if the user refuses to confirm or if buffer-or-name was
+      ;; already dead.
+      (kill-buffer buffer))))
 
-(defun testme ()
-  (message "my-test: %s" (current-buffer)))
+(add-hook 'codesuki--quit-hook 'codesuki--kill-popups)
 
-(testme)
+(defun codesuki--delete-popup ()
+  (delete (current-buffer) codesuki--popups))
 
-(defun codesuki/display-buffer-in-side-window (buffer &rest alist)
+(defun codesuki--display-buffer-in-side-window (buffer &rest alist)
   (let ((window (display-buffer-in-side-window buffer alist)))
-      (add-to-list 'codesuki/popups window))
+    (add-to-list 'codesuki--popups buffer))
   (with-current-buffer buffer
-    (add-hook 'kill-buffer-hook #'testme)))
+    (add-hook 'kill-buffer-hook #'codesuki--delete-popup nil t)))
 
-(setq display-buffer-alist '(("\\*Help\\*" (codesuki/display-buffer-in-side-window))
-                             ("\\*info\\*" (codesuki/display-buffer-in-side-window))
-                             ("\\*Backtrace\\*" (codesuki/display-buffer-in-side-window))
-                             ("\\*eldoc\\*" (codesuki/display-buffer-in-side-window))))
+(setq display-buffer-alist '(("\\*Help\\*" (codesuki--display-buffer-in-side-window))
+                             ("\\*info\\*" (codesuki--display-buffer-in-side-window))
+                             ("\\*Backtrace\\*" (codesuki--display-buffer-in-side-window))
+                             ("\\*eldoc\\*" (codesuki--display-buffer-in-side-window))
+                             ("\\*Warnings\\*" (codesuki--display-buffer-in-side-window))))
 
 ;; built-in but newer versions on elpa
 (use-package xref)
@@ -412,7 +421,7 @@ codesuki/popups
   :diminish eldoc-mode
   :config
   (add-hook 'emacs-lisp-mode-hook 'eldoc-mode))
-(setq eldoc-documentation-strategy 'eldoc-documentation-compose)
+
 (use-package project)
 
 ;;(require 'ansi-color)
@@ -531,27 +540,27 @@ codesuki/popups
   (setq calendar-holidays (append holiday-christian-holidays japanese-holidays)))
 
 (require 'cl-lib)
-;; (defun codesuki/org-agenda-inhibit-frame-change (fn &rest args)
+;; (defun codesuki--org-agenda-inhibit-frame-change (fn &rest args)
 ;;   "This function prevents `org-agenda` to change the frame."
 ;;   (cl-letf (((symbol-function 'delete-other-windows) #'ignore)
 ;;             ((symbol-function 'delete-window) #'ignore))
 ;;     (apply fn args)))
-;; (advice-add 'org-agenda-get-restriction-and-command :around 'codesuki/org-agenda-inhibit-frame-change)
-;; (advice-add 'org-capture :around 'codesuki/org-agenda-inhibit-frame-change)
+;; (advice-add 'org-agenda-get-restriction-and-command :around 'codesuki--org-agenda-inhibit-frame-change)
+;; (advice-add 'org-capture :around 'codesuki--org-agenda-inhibit-frame-change)
 
 
 ;; ;; For some reason org prevents popups with `org-no-popups`
-;; (defun codesuki/org-allow-popups (fn buf &optional norecord)
+;; (defun codesuki--org-allow-popups (fn buf &optional norecord)
 ;;   (switch-to-buffer-other-window buf norecord))
-;; (advice-add 'org-switch-to-buffer-other-window :around 'codesuki/org-allow-popups)
+;; (advice-add 'org-switch-to-buffer-other-window :around 'codesuki--org-allow-popups)
 
-(defun codesuki/org-vertically-split-follow-mode-window (fn &rest args)
+(defun codesuki--org-vertically-split-follow-mode-window (fn &rest args)
   "Make `org-agenda-follow-mode` open windows in a new vertical split."
   (let ((split-height-threshold nil))
     (apply fn args)))
-(advice-add 'org-agenda-do-context-action :around 'codesuki/org-vertically-split-follow-mode-window)
+(advice-add 'org-agenda-do-context-action :around 'codesuki--org-vertically-split-follow-mode-window)
 ;; this lets org-agenda pop-up on the right side of the screen when using reorganize-frame
-(advice-add 'org-agenda-prepare-window :around 'codesuki/org-vertically-split-follow-mode-window)
+(advice-add 'org-agenda-prepare-window :around 'codesuki--org-vertically-split-follow-mode-window)
 
 (use-package org
   :config
@@ -599,7 +608,7 @@ codesuki/popups
   (global-set-key (kbd "C-c a") #'org-agenda)
   (org-babel-do-load-languages 'org-babel-load-languages '((C . t))))
 
-(defun codesuki/org-capture-to-website ()
+(defun codesuki--org-capture-to-website ()
   (message "%s" (org-capture-get :annotation))
   (message "%s" org-capture-current-plist)
   (message "%s" org-capture-plist)
@@ -1274,18 +1283,18 @@ codesuki/popups
     (add-hook 'python-mode-hook 'anaconda-mode)
     (add-hook 'python-mode-hook 'anaconda-eldoc-mode)))
 
-(use-package company-anaconda
-  :defer t
-  :config
-  (eval-after-load "company" '(add-to-list 'company-backends 'company-anaconda)))
+;; (use-package company-anaconda
+;;   :defer t
+;;   :config
+;;   (eval-after-load "company" '(add-to-list 'company-backends 'company-anaconda)))
 
 (use-package yaml-mode
   :defer t)
 
-(use-package company-c-headers
-  :defer t
-  :config
-  (add-to-list 'company-backends 'company-c-headers))
+;; (use-package company-c-headers
+;;   :defer t
+;;   :config
+;;   (add-to-list 'company-backends 'company-c-headers))
 
 (use-package google-c-style
   :straight (google-c-style :branch "master")
@@ -1394,8 +1403,8 @@ codesuki/popups
   :defer 2
   :diminish (which-key-mode . " Ⓚ")
   :config
-  (progn
-    (which-key-mode)))
+  (which-key-mode)
+  (setq which-key-use-C-h-commands nil))
 
 (use-package guru-mode
   :diminish guru-mode
