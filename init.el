@@ -144,11 +144,6 @@
 
 (defun setup-font ()
   "Setup fonts and enable `variable-pitch-mode'."
-  ;;(set-frame-font "InputMonoCondensed-14" nil t)
-  ;;(add-to-list 'default-frame-alist '(font . "InputMonoCondensed-14"))
-  ;;(set-face-attribute 'variable-pitch nil :font "InputSansCompressed-14")
-
-  ;; (add-to-list 'default-frame-alist '(font . "Input Mono Condensed-14"))
   (set-face-attribute 'default nil :font "Input Mono Condensed-14" :weight 'medium)
   (set-face-attribute 'fixed-pitch nil :font "Input Mono Condensed-14" :weight 'medium)
   (set-face-attribute 'variable-pitch nil :font "Input Sans Compressed-14" :weight 'medium)
@@ -180,11 +175,10 @@
   '(term ((t (:background "#292b2e" :foreground "#b2b2b2" :family "InputCustomMonoCompressed")))))
 
 (defun enable-extra-functionality ()
-  (progn
     (put 'narrow-to-region 'disabled nil)
     (put 'upcase-region 'disabled nil)
     (put 'downcase-region 'disabled nil)
-    (put 'dired-find-alternate-file 'disabled nil)))
+    (put 'dired-find-alternate-file 'disabled nil))
 
 (defun disable-bell ()
   (setq ring-bell-function 'ignore
@@ -293,8 +287,6 @@
     (unless (looking-back "\\b")
       (backward-word))))
 
-
-
 ;; from doom emacs
 (defconst IS-MAC     (eq system-type 'darwin))
 (defconst IS-LINUX   (eq system-type 'gnu/linux))
@@ -325,7 +317,13 @@
   (setq lsp-server-install-dir (to-local-path "lsp/server/"))
   (setq lsp-session-file (to-local-path "lsp/session.el"))
   (setq lsp-java-workspace-dir (to-local-path "lsp-java/workspace/"))
-  (setq dap-breakpoints-file (to-local-path "dap/breakpoints.el")))
+  (setq dap-breakpoints-file (to-local-path "dap/breakpoints.el"))
+  (setq url-cache-directory (to-local-path "url/cache/"))
+  (setq url-configuration-directory (to-local-path "url/"))
+  (setq url-cookie-file (to-local-path "url/cookies.el"))
+  (setq url-history-file(to-local-path "url/history.el"))
+  (setq save-place-file (to-local-path "saveplace.el"))
+  (setq savehist-file (to-local-path "savehist.el")))
 
 
 (defun init ()
@@ -347,9 +345,9 @@
   (global-set-key (kbd "M-v") 'View-scroll-half-page-backward)
   (global-set-key (kbd "M-z") 'zap-up-to-char)
   (global-set-key (kbd "C-?") 'help-command)
-  (global-set-key (kbd "C-h") 'delete-backward-char)
-  ;;(define-key key-translation-map (kbd "C-h") (kbd "<DEL>"))
-  )
+  (global-set-key (kbd "C-h") 'delete-backward-char))
+
+(setq custom-file (locate-user-emacs-file "custom.el"))
 
 (defun init-ui ()
   "Init UI relating settings.
@@ -385,11 +383,20 @@ returns non-nil. If all hooks return nil it executes
   (unless (run-hook-with-args-until-success 'codesuki--quit-hook)
     (keyboard-quit)))
 
-(global-set-key (kbd "C-g") 'codesuki-quit)
+;; We remap keyboard-quit instead of `C-g', because `project-switch-project'
+;; directly compares the key-map entry to `keyboard-quit'. If it returns
+;; `codesuki-quit' it will not cancel the command.
+(global-set-key [remap keyboard-quit] 'codesuki-quit)
 
 ;; this function should return nil if nothing is killed t otherwise.
 (defun codesuki--kill-popups ()
-  ;; We should pop after `kill-buffer' returns `t'.
+  ;; We should pop after `kill-buffer' returns `t'. In case of vterm we get
+  ;; asked whether or not we want to kill the buffer. If we decline then this
+  ;; will remove the buffer from the list and we cannot close it with C-g
+  ;; anymore.
+  ;;
+  ;; Actually it would be OK to never `pop' because `codesuki--delete-popup'
+  ;; cleans up once a buffer is killed.
   (let ((buffer (pop codesuki--popups)))
     (when buffer
       ;; `kill-buffer': This function returns `t' if it actually killed the buffer.
@@ -403,16 +410,33 @@ returns non-nil. If all hooks return nil it executes
   (delete (current-buffer) codesuki--popups))
 
 (defun codesuki--display-buffer-in-side-window (buffer &rest alist)
-  (let ((window (display-buffer-in-side-window buffer alist)))
+  (let ((window (display-buffer-in-side-window buffer (car alist))))
     (add-to-list 'codesuki--popups buffer))
   (with-current-buffer buffer
     (add-hook 'kill-buffer-hook #'codesuki--delete-popup nil t)))
 
-(setq display-buffer-alist '(("\\*Help\\*" (codesuki--display-buffer-in-side-window))
-                             ("\\*info\\*" (codesuki--display-buffer-in-side-window))
-                             ("\\*Backtrace\\*" (codesuki--display-buffer-in-side-window))
-                             ("\\*eldoc\\*" (codesuki--display-buffer-in-side-window))
-                             ("\\*Warnings\\*" (codesuki--display-buffer-in-side-window))))
+;; TODO: make it easier to set window parameters. It's quite repetitive.
+(setq display-buffer-alist '(("\\*Help\\*"
+                              (codesuki--display-buffer-in-side-window)
+                              (window-parameters (mode-line-format . none)))
+                             ("\\*Helpful"
+                              (codesuki--display-buffer-in-side-window)
+                              (window-parameters (mode-line-format . none)))
+                             ("\\*info\\*"
+                              (codesuki--display-buffer-in-side-window)
+                              (side . right))
+                              ;; this one does not close on C-g. This was because the debugger was on.
+                             ("\\*Backtrace\\*"
+                              (codesuki--display-buffer-in-side-window))
+                             ("\\*eldoc\\*"
+                              (codesuki--display-buffer-in-side-window))
+                             ("\\*Compile-Log\\*"
+                              (codesuki--display-buffer-in-side-window))
+                             ("\\*Warnings\\*"
+                              (codesuki--display-buffer-in-side-window))
+                             ("\\*vterm\\*"
+                              (codesuki--display-buffer-in-side-window)
+                              (window-parameters (mode-line-format . none))))) ;; modeline should be hidden and switch to it
 
 ;; built-in but newer versions on elpa
 (use-package xref)
@@ -441,16 +465,20 @@ returns non-nil. If all hooks return nil it executes
 
 (use-package electric
   :config
+  ;; This prevents the following scenario (| is the point): |defun -> (|)defun
+  (setq electric-pair-inhibit-predicate 'electric-pair-conservative-inhibit)
   (electric-indent-mode)
   (electric-pair-mode))
 
 (use-package paren
   :config
+  ;; Interesting, but should set the border to distinguish. Check docs.
+  ;; (setq show-paren-context-when-offscreen 'child-frame)
   (setq show-paren-delay 0.1)
   (setq show-paren-when-point-inside-paren t)
   (show-paren-mode))
 
-;; Better rectangle editing. This conflicts with org-mode.
+;; Better rectangle editing. This conflicts with org-mode `C-RET'.
 ;; (use-package cua-base
 ;;   :config
 ;;   (cua-selection-mode t))
@@ -459,19 +487,13 @@ returns non-nil. If all hooks return nil it executes
   :config
   (delete-selection-mode))
 
-;; (use-package ido
-;;   :config
-;;   (progn
-;;     (ido-mode)
-;;     (ido-everywhere)
-;;     (setq ido-use-virtual-buffers t)))
-
 (use-package autorevert
   :diminish auto-revert-mode)
 
 (use-package mwheel
   :straight nil
   :config
+  (setq scroll-margin 0)
   (setq scroll-preserve-screen-position 'always)
   (setq scroll-conservatively 101) ;; don't recenter when point moves out of screen
   (setq mouse-wheel-progressive-speed nil)
@@ -501,8 +523,16 @@ returns non-nil. If all hooks return nil it executes
 
 (use-package gnutls)
 
+(use-package exec-path-from-shell
+  :config
+  (progn
+    (setq exec-path-from-shell-variables '("GOPATH" "PATH" "MANPATH"))
+    (setq exec-path-from-shell-arguments nil)
+    (exec-path-from-shell-initialize)))
+
 (use-package ispell
   :config
+  (setenv "LANG" "en_US.UTF-8")
   (setq ispell-dictionary "en_US-large,de_DE_frami")
   (setq ispell-program-name "hunspell")
   (ispell-set-spellchecker-params)
@@ -514,6 +544,13 @@ returns non-nil. If all hooks return nil it executes
   :config
   (setq flyspell-issue-message-flag nil)
   (setq flyspell-issue-welcome-flag nil))
+
+(use-package helpful
+  :defer t
+  :config
+  (define-key help-map (kbd "f") #'helpful-callable)
+  (define-key help-map (kbd "v") #'helpful-variable)
+  (define-key help-map (kbd "k") #'helpful-key))
 
 (defun setup-org-faces ()
   "Make fixed-width what should be fixed-width."
@@ -606,7 +643,8 @@ returns non-nil. If all hooks return nil it executes
            :immediate-finish t)))
   (global-set-key (kbd "C-c c") #'org-capture)
   (global-set-key (kbd "C-c a") #'org-agenda)
-  (org-babel-do-load-languages 'org-babel-load-languages '((C . t))))
+  ;; (org-babel-do-load-languages 'org-babel-load-languages '((C . t)))
+  )
 
 (defun codesuki--org-capture-to-website ()
   (message "%s" (org-capture-get :annotation))
@@ -658,111 +696,11 @@ returns non-nil. If all hooks return nil it executes
   :config
   (winner-mode))
 
-
-;; (use-package imenu-list)
-
-;; (use-package window-purpose
-;;   :after imenu-list golden-ratio
-;;   ;;:straight (window-purpose :fork (:host github :repo "codesuki/emacs-purpose" :branch "counsel"))
-;;   :config
-;;   (setq purpose-default-action-order 'prefer-same-window)
-;;   ;; (add-to-list 'purpose-user-mode-purposes
-;;   ;;              '((bazel-mode . edit)
-;;   ;;                (terraform-mode . edit))
-;;   ;; (purpose-compile-user-configuration)
-;;   ;; regex $*info*
-
-
-;;   (purpose-mode)
-;;   (define-key purpose-mode-map (kbd "C-x b") nil)
-;;   (define-key purpose-mode-map (kbd "C-x C-f") nil)
-;;   (require 'window-purpose-x)
-;;   (purpose-x-golden-ratio-setup)
-;;   (purpose-x-popwin-setup)
-;;   (add-to-list 'purpose-special-action-sequences
-;;                '(edit purpose-display-maybe-same-window
-;;                       purpose-display-reuse-window-buffer
-;;                       purpose-display-reuse-window-purpose
-;;                       purpose-display-maybe-other-window
-;;                       purpose-display-maybe-other-frame
-;;                       purpose-display-maybe-pop-up-window
-;;                       purpose-display-maybe-pop-up-frame))
-;;   (add-to-list 'purpose-x-popwin-buffer-names "*Backtrace*")
-;;   (add-to-list 'purpose-x-popwin-buffer-names "*Agenda Commands*")
-;;   (add-to-list 'purpose-user-mode-purposes '(info . popup))
-;;   (add-to-list 'purpose-user-name-purposes '("*Agenda Commands*" . popup))
-;;   (purpose-compile-user-configuration)
-;;   )
-
 (use-package unbound)
 
-;; (use-package paradox
-;;   :disabled
-;;   :defer t
-;;   :config
-;;   (progn
-;;     (paradox-enable)))
-
-;; (use-package icomplete
-;;   :config
-;;   ;; don't show the completion buffer
-;;   (setq completion-auto-help nil)
-;;   (setq icomplete-show-matches-on-no-input t)
-;;   (fido-mode)
-;;   (fido-vertical-mode))
-
-;; (use-package amx
-;;   :config
-;;   (amx-initialize))
-
-;; (use-package flx)
-
-;; https://github.com/abo-abo/swiper/issues/2052
-(defun my-ivy-kill-current ()
-  "Save current Ivy candidate to the `kill-ring'."
-  (interactive)
-  (kill-new (ivy-state-current ivy-last)))
-
-;; alternative
-;; https://github.com/hlissner/doom-emacs/blob/4cabedf94c45305642b76da784475245fa59413b/modules/completion/ivy/config.el#L266-L274
-
-;; (use-package ivy
-;;   :after amx
-;;   :config
-;;   (setq enable-recursive-minibuffers t)
-;;  ivy-sort-max-size
-;;   (setq ivy-use-virtual-buffers t)
-;;   (setq ivy-count-format "(%d/%d) ")
-;;   (setq ivy-re-builders-alist '((swiper . ivy--regex-plus)
-;;                                 (t . ivy--regex-fuzzy)))
-;;   (ivy-mode)
-;;   (global-set-key (kbd "C-x b") 'ivy-switch-buffer)
-;;   (global-set-key (kbd "C-c C-r") 'ivy-resume)
-;;   (define-key ivy-minibuffer-map (kbd "C-j") #'ivy-immediate-done)
-;;   (define-key ivy-minibuffer-map (kbd "RET") #'ivy-alt-done)
-;;   (define-key ivy-minibuffer-map (kbd "M-w") #'my-ivy-kill-current))
-
-;; (use-package counsel
-;;   :after ivy
-;;   :config
-;;   (counsel-mode)
-;;   (global-set-key (kbd "C-x C-f") 'counsel-find-file)
-;;   (global-set-key (kbd "C-x b") 'counsel-switch-buffer)
-;;   (global-set-key (kbd "M-x") 'counsel-M-x)
-;;   (global-set-key (kbd "M-y") 'counsel-yank-pop)
-;;   (global-set-key (kbd "C-c g") 'counsel-git)
-;;   (global-set-key (kbd "C-M-i") 'counsel-company)
-;;   (global-set-key (kbd "<f1> f") 'counsel-describe-function)
-;;   (global-set-key (kbd "<f1> v") 'counsel-describe-variable)
-;;   (global-set-key (kbd "<f1> o") 'counsel-describe-symbol)
-;;   (global-set-key (kbd "<f1> l") 'counsel-find-library)
-;;   (global-set-key (kbd "<f2> i") 'counsel-info-lookup-symbol)
-;;   (global-set-key (kbd "<f2> u") 'counsel-unicode-char))
-
-;; (use-package swiper
-;;   :defer t
-;;   :config
-;;   (global-set-key (kbd "C-s") 'swiper))
+(use-package vterm
+  :config
+  (add-hook 'vterm-mode-hook (lambda () (setq-local show-trailing-whitespace nil))))
 
 (use-package goto-chg
   :config
@@ -799,16 +737,19 @@ returns non-nil. If all hooks return nil it executes
          ("C-<" . mc/mark-previous-like-this)))
 
 (use-package avy
-  :bind (("C-\"" . avy-move-region)
-         ("C-:" . avy-kill-region)
-         ("C-'" . avy-goto-char-timer)
-         ("s-g" . avy-goto-line))
+  :bind (("C-'" . avy-goto-char-timer)
+         ;; ("C-\"" . avy-move-region)
+         ;; ("C-:" . avy-kill-region)
+         ;; ("s-g" . avy-goto-line)
+         )
   :config
   (setq avy-background t)
   (avy-setup-default))
 
 (use-package ace-window
-  :bind ("M-o" . ace-window))
+  :bind ("M-o" . ace-window)
+  :config
+  (setq aw-keys '(?a ?s ?d ?f ?g ?h ?j ?k ?l)))
 
 (use-package ace-link
   :config
@@ -818,11 +759,11 @@ returns non-nil. If all hooks return nil it executes
   :hook (emacs-lisp-mode . rainbow-delimiters-mode))
 
 (use-package anzu
-  :diminish anzu-mode
   :config
-  (progn
-    (setq anzu-cons-mode-line-p nil)
-    (global-anzu-mode)))
+  (setq anzu-cons-mode-line-p nil)
+  (global-set-key [remap query-replace] 'anzu-query-replace)
+  (global-set-key [remap query-replace-regexp] 'anzu-query-replace-regexp)
+  (global-anzu-mode))
 
 (use-package doom-themes
   :config
@@ -850,14 +791,9 @@ returns non-nil. If all hooks return nil it executes
   (setq doom-modeline-irc nil)
   (doom-modeline-mode))
 
-        ;; doom-modeline-buffer-encoding 'nondefault
-        ;; doom-modeline-default-eol-type
-        ;; (cond (IS-MAC 2)
-        ;;       (IS-WINDOWS 1)
-        ;;       (0)))
-
 (use-package highlight-indent-guides
   :config
+  (setq highlight-indent-guides-method 'column)
   (add-hook 'yaml-mode-hook 'highlight-indent-guides-mode))
 
 (use-package treemacs
@@ -889,9 +825,6 @@ returns non-nil. If all hooks return nil it executes
         ("C-x t C-t" . treemacs-find-file)
         ("C-x t M-t" . treemacs-find-tag)))
 
-;; (use-package treemacs-projectile
-;;   :after treemacs projectile)
-
 (use-package treemacs-icons-dired
   :after treemacs dired
   :config (treemacs-icons-dired-mode))
@@ -899,12 +832,28 @@ returns non-nil. If all hooks return nil it executes
 (use-package treemacs-magit
   :after treemacs magit)
 
-(use-package git-gutter
-  :diminish git-gutter-mode
-  :defer 2
+(define-fringe-bitmap 'codesuki--vc-fringe-bmp-insert [#b11100000] nil nil '(center repeated))
+(define-fringe-bitmap 'codesuki--vc-fringe-bmp-change [#b11100000] nil nil '(center repeated))
+(define-fringe-bitmap 'codesuki--vc-fringe-bmp-delete
+  [#b10000000
+   #b11000000
+   #b11100000
+   #b11110000] nil nil 'bottom)
+
+;;why does this even work?
+(defun codesuki--fringe-bmp-from-type (type pos)
+  ""
+  (intern (format "codesuki--vc-fringe-bmp-%s" type)))
+
+(use-package diff-hl
   :config
-  (setq git-gutter:window-width 2)
-  (global-git-gutter-mode))
+  (fringe-mode '4)
+  (set-face-attribute 'diff-hl-insert nil :background nil)
+  (set-face-attribute 'diff-hl-delete nil :background nil)
+  (set-face-attribute 'diff-hl-change nil :background nil)
+  (setq-default fringes-outside-margins t)
+  (setq diff-hl-fringe-bmp-function 'codesuki--fringe-bmp-from-type)
+  (global-diff-hl-mode))
 
 (use-package git-timemachine
   :defer t)
@@ -912,33 +861,9 @@ returns non-nil. If all hooks return nil it executes
 (use-package ripgrep
   :defer t)
 
-;; (use-package projectile
-;;   :config
-;;   (projectile-mode)
-;;   (define-key projectile-mode-map (kbd "C-c p") 'projectile-command-map)
-;; ;;  (setq projectile-completion-system 'ivy)
-;;   (setq projectile-completion-system 'auto)
-;;   (setq projectile-globally-ignored-directories
-;;         (append projectile-globally-ignored-directories
-;;                 '("*.terraform"
-;;                   "*vendor"))))
-
-;; (use-package counsel-projectile
-;;   :config
-;;   (setcar (nthcdr 0 counsel-projectile-switch-project-action) 2)
-;;   (counsel-projectile-mode))
-
-(use-package exec-path-from-shell
-  :config
-  (progn
-    (setq exec-path-from-shell-variables '("GOPATH" "PATH" "MANPATH"))
-    (setq exec-path-from-shell-arguments nil)
-    (exec-path-from-shell-initialize)))
-
 (use-package smartparens)
 
 (use-package editorconfig
-  :diminish (editorconfig-mode . " ⓔ")
   :config
   (editorconfig-mode))
 
@@ -946,9 +871,7 @@ returns non-nil. If all hooks return nil it executes
   :defer t)
 
 (use-package magit
-  :defer t
-  :config
-  (setq magit-completing-read-function 'ivy-completing-read))
+  :defer t)
 
 (use-package forge
   :after magit)
@@ -957,29 +880,6 @@ returns non-nil. If all hooks return nil it executes
   :defer t
   :config
   (winum-mode))
-
-;; consider using zoom
-;; https://github.com/cyrus-and/zoom
-;; (use-package golden-ratio
-;;   :diminish (golden-ratio-mode . " ⓖ")
-;;   :config
-;;   (progn
-;;     (golden-ratio-mode)
-;;     (setq window-combination-resize t)
-;;     (setq golden-ratio-auto-scale t)
-;;     (setq golden-ratio-extra-commands
-;;           (append golden-ratio-extra-commands
-;;                   '(ace-window
-;;                     ace-delete-window
-;;                     ace-select-window
-;;                     ace-swap-window
-;;                     ace-maximize-window
-;;                     avy-pop-mark
-;;                     avy-goto-char-timer)))))
-
-(use-package smooth-scrolling
-  :config
-  (smooth-scrolling-mode))
 
 (use-package rainbow-mode
   :diminish rainbow-mode
@@ -993,20 +893,10 @@ returns non-nil. If all hooks return nil it executes
 
 (use-package flymake
   :config
+  (remove-hook 'flymake-diagnostic-functions 'flymake-proc-legacy-flymake)
   (define-key flymake-mode-map (kbd "M-n") 'flymake-goto-next-error)
-  (define-key flymake-mode-map (kbd "M-p") 'flymake-goto-prev-error))
-
-;; (use-package flycheck
-;;   :defer 2
-;;   :diminish (flycheck-mode . " ⓢ")
-;;   :config
-;;   (global-flycheck-mode)
-;;   (setq flycheck-go-golint-executable "golint"))
-
-;; (use-package flycheck-package
-;;   :after flycheck
-;;   :config
-;;   (flycheck-package-setup))
+  (define-key flymake-mode-map (kbd "M-p") 'flymake-goto-prev-error)
+  (flymake-mode))
 
 (use-package keyfreq
   :config
@@ -1017,20 +907,31 @@ returns non-nil. If all hooks return nil it executes
   :init
   (savehist-mode))
 
+(use-package saveplace
+  :init
+  (save-place-mode))
+
 (use-package eglot
+  :defer t
   :config
   (define-key eglot-mode-map (kbd "C-c r") 'eglot-rename)
   (define-key eglot-mode-map (kbd "C-c o") 'eglot-code-action-organize-imports)
-  (define-key eglot-mode-map (kbd "C-c h") 'eldoc)
-  (add-hook 'go-mode-hook #'eglot-ensure))
+  (define-key eglot-mode-map (kbd "C-c h") 'eldoc))
 
 (use-package orderless
   :config
   (setq completion-styles '(orderless)))
 
+(defun corfu-enable-in-minibuffer ()
+  "Enable Corfu in the minibuffer if `completion-at-point' is bound."
+  (when (where-is-internal #'completion-at-point (list (current-local-map)))
+    ;; (setq-local corfu-auto nil) Enable/disable auto completion
+    (corfu-mode 1)))
+
 (use-package corfu
   :init
-  (corfu-global-mode))
+  (corfu-global-mode)
+  (add-hook 'minibuffer-setup-hook #'corfu-enable-in-minibuffer))
 
 (use-package vertico
   :straight (vertico :includes vertico-directory
@@ -1055,7 +956,7 @@ returns non-nil. If all hooks return nil it executes
   (marginalia-mode))
 
 (setq mac-command-modifier 'meta)
-(vertico-directory-up)
+
 (use-package consult
   :bind (;; C-c bindings (mode-specific-map)
          ;; ("C-c h" . consult-history)
@@ -1076,8 +977,8 @@ returns non-nil. If all hooks return nil it executes
          ("M-y" . consult-yank-pop)                ;; orig. yank-pop
          ("<help> a" . consult-apropos)            ;; orig. apropos-command
          ;; M-g bindings (goto-map)
-         ;; ("M-g e" . consult-compile-error)
-         ;; ("M-g f" . consult-flymake)               ;; Alternative: consult-flycheck
+         ("M-g e" . consult-compile-error)
+         ("M-g f" . consult-flymake)               ;; Alternative: consult-flycheck
          ("M-g g" . consult-goto-line)             ;; orig. goto-line
          ("M-g M-g" . consult-goto-line)           ;; orig. goto-line
          ;; ("M-g o" . consult-outline)               ;; Alternative: consult-org-heading
@@ -1090,9 +991,8 @@ returns non-nil. If all hooks return nil it executes
          ;; ("M-s D" . consult-locate)
          ;; ("M-s g" . consult-grep)
          ;; ("M-s G" . consult-git-grep)
-         ;; ("M-s r" . consult-ripgrep)
-         ;; ("M-s l" . consult-line)
-         ("C-s" . consult-line)
+         ("M-s r" . consult-ripgrep)
+         ("M-s l" . consult-line)
          ;; ("M-s L" . consult-line-multi)
          ;; ("M-s m" . consult-multi-occur)
          ;; ("M-s k" . consult-keep-lines)
@@ -1108,6 +1008,21 @@ returns non-nil. If all hooks return nil it executes
   (setq xref-show-xrefs-function #'consult-xref)
   (setq xref-show-definitions-function #'consult-xref))
 
+(defun codesuki-embark-ace-window-file ()
+  (interactive)
+  (require 'ace-window)
+  (let ((aw-dispatch-always t))
+    ;;(aw-switch-to-window (aw-select nil))
+    (aw-select nil #'aw-switch-to-window)
+    (call-interactively #'find-file)))
+
+(defun codesuki-embark-ace-window-buffer ()
+  (interactive)
+  (require 'ace-window)
+  (let ((aw-dispatch-always t))
+    ;;(aw-switch-to-window (aw-select nil))
+    (aw-select nil #'aw-switch-to-window)
+    (call-interactively #'switch-to-buffer)))
 
 (use-package embark
   :bind
@@ -1120,6 +1035,8 @@ returns non-nil. If all hooks return nil it executes
   (setq prefix-help-command #'embark-prefix-help-command)
 
   :config
+  (define-key embark-file-map "o" #'codesuki-embark-ace-window-file)
+  (define-key embark-buffer-map "o" #'codesuki-embark-ace-window-buffer)
   ;; Hide the mode line of the Embark live/completions buffers
   (add-to-list 'display-buffer-alist
                '("\\`\\*Embark Collect \\(Live\\|Completions\\)\\*"
@@ -1156,74 +1073,6 @@ returns non-nil. If all hooks return nil it executes
   ;; `completion-at-point' is often bound to M-TAB.
   (setq tab-always-indent 'complete))
 
-;; (flycheck-define-checker protobuf
-;;   "A Scala syntax checker using the Scala compiler.
-
-;; See URL `https://www.scala-lang.org/'."
-;;   :command ("prototool" "lint" source-original)
-;;   :error-patterns
-;;   ((error line-start (file-name) ":" line ":" column ":" (message) line-end))
-;;   :modes protobuf-mode
-;;   :next-checkers 'protobuf-protoc)
-
-;; (use-package company
-;;   :defer 2
-;;   :diminish (company-mode . " ⓐ")
-;;   :bind (:map company-search-map
-;;               ("C-n" . company-select-next)
-;;               ("C-p" . company-select-previous)
-;;               :map company-active-map
-;;               ("C-n" . company-select-next)
-;;               ("C-p" . company-select-previous))
-;;   :config
-;;   (global-company-mode)
-;;   (setq company-dabbrev-downcase nil))
-
-;; (use-package company-box
-;;   :hook (company-mode . company-box-mode))
-
-
-;; (defun setup-lsp-keymap ()
-;;   "Add a keymap to go-mode for lsp commands."
-;;   (let ((m (define-prefix-command 'go-lsp-map)))
-;;     (define-key m "d" #'lsp-find-declaration)
-;;     (define-key m "r" #'lsp-find-references)
-;;     (define-key m "t" #'lsp-find-type-definition))
-
-;;   (define-key go-mode-map (kbd "C-c C-l") 'go-lsp-map))
-
-;; (use-package lsp-mode
-;;   :defer t
-;;   :init (setq lsp-keymap-prefix "s-l")
-;;   :commands lsp
-;;   :hook ((lsp-mode . lsp-enable-which-key-integration))
-;;   :config
-;;   (setq lsp-symbol-highlighting-skip-current t)
-;;   (setq lsp-enable-links nil)
-;;   (setq lsp-eldoc-render-all t)
-;;   (setq lsp-prefer-capf t)
-;;   (setq lsp-headerline-breadcrumb-enable nil)
-;;   (setq lsp-enable-file-watchers nil)
-;;   ;; (setq lsp-go-env '(("GOPACKAGESDRIVER" . "./tools/gopackagesdriver.sh")))
-;;   (add-to-list 'lsp-file-watch-ignored-directories "[/\\\\]bazel-.*\\'")
-;;   (add-to-list 'lsp-file-watch-ignored-directories "[/\\\\]docs\\'")
-;;   (add-to-list 'lsp-file-watch-ignored-directories "[/\\\\]web\\'"))
-
-;; (use-package lsp-ui
-;;   :defer t
-;;   :commands lsp-ui-mode
-;;   :config
-;;   (setq lsp-ui-doc-enable nil)
-;;   (define-key lsp-ui-mode-map [remap xref-find-definitions] #'lsp-ui-peek-find-definitions)
-;;   (define-key lsp-ui-mode-map [remap xref-find-references] #'lsp-ui-peek-find-references))
-
-;; (use-package lsp-ivy
-;;   :defer t)
-
-;; (use-package lsp-java
-;;   :defer t
-;;   :hook ((java-mode . lsp)))
-
 (use-package dockerfile-mode
   :defer t)
 
@@ -1233,6 +1082,7 @@ returns non-nil. If all hooks return nil it executes
   (add-to-list 'auto-mode-alist '("\\.s\\'" . nasm-mode)))
 
 (use-package emacs-bazel-mode
+  :defer t
   :straight  '(bazel :type git :host github :repo "bazelbuild/emacs-bazel-mode")
   :commands bazel-mode
   :config
@@ -1247,23 +1097,12 @@ returns non-nil. If all hooks return nil it executes
 (use-package go-mode
   :defer t
   :config
-  (progn
-    (setq gofmt-command "goimports")
-    ;;(add-hook 'before-save-hook #'gofmt-before-save)
-    (add-hook 'go-mode-hook 'subword-mode)
-    (add-hook 'go-mode-hook #'lsp-deferred)
-    (add-hook 'go-mode-hook #'lsp-go-install-save-hooks)
-    ;;(add-hook 'go-mode-hook 'setup-lsp-keymap)
-    ;; default is M-, and M-.
-    ;;(add-hook 'go-mode-hook (lambda () (local-set-key (kbd "C-.") #'lsp-find-definition)))
-    ;;(add-hook 'go-mode-hook (lambda () (local-set-key (kbd "C-,") #'xref-pop-marker-stack)))
-    ;;(add-hook 'go-mode-hook (lambda () (define-key go-mode-map (kbd "C-=") #'go-guru-expand-region)))
-    (add-hook 'go-mode-hook (lambda () (add-to-list 'flycheck-disabled-checkers 'go-gofmt)))
-    (add-hook 'go-mode-hook (lambda () (add-to-list 'flycheck-disabled-checkers 'go-test)))
-    (add-hook 'go-mode-hook (lambda () (add-to-list 'flycheck-disabled-checkers 'go-vet)))
-    (add-hook 'go-mode-hook (lambda () (add-to-list 'flycheck-disabled-checkers 'go-build)))
-    (add-hook 'go-mode-hook (lambda () (add-to-list 'flycheck-disabled-checkers 'go-megacheck)))
-    (add-hook 'go-mode-hook (lambda () (add-to-list 'flycheck-disabled-checkers 'go-staticcheck)))))
+  (add-hook 'go-mode-hook #'subword-mode)
+  (add-hook 'go-mode-hook #'eglot-ensure)
+  (setq gofmt-command "goimports")
+  ;;(add-hook 'before-save-hook #'gofmt-before-save)
+  ;;(add-hook 'go-mode-hook (lambda () (define-key go-mode-map (kbd "C-=") #'go-guru-expand-region)))
+  )
 
 (use-package go-guru)
 
@@ -1279,22 +1118,11 @@ returns non-nil. If all hooks return nil it executes
 (use-package anaconda-mode
   :defer t
   :config
-  (progn
-    (add-hook 'python-mode-hook 'anaconda-mode)
-    (add-hook 'python-mode-hook 'anaconda-eldoc-mode)))
-
-;; (use-package company-anaconda
-;;   :defer t
-;;   :config
-;;   (eval-after-load "company" '(add-to-list 'company-backends 'company-anaconda)))
+  (add-hook 'python-mode-hook 'anaconda-mode)
+  (add-hook 'python-mode-hook 'anaconda-eldoc-mode))
 
 (use-package yaml-mode
   :defer t)
-
-;; (use-package company-c-headers
-;;   :defer t
-;;   :config
-;;   (add-to-list 'company-backends 'company-c-headers))
 
 (use-package google-c-style
   :straight (google-c-style :branch "master")
@@ -1325,7 +1153,6 @@ returns non-nil. If all hooks return nil it executes
     (setq js2-mode-show-parse-errors nil)))
 
 (use-package add-node-modules-path
-;;  :load-path "add-node-modules-path/"
   :config
   (progn
     (eval-after-load 'js2-mode
@@ -1336,10 +1163,47 @@ returns non-nil. If all hooks return nil it executes
       '(add-hook 'typescript-mode-hook #'add-node-modules-path))))
 
 (use-package typescript-mode
-  :defer t
-  :bind (:map typescript-mode-map ("C-c c" . compile))
+  :init
+  (define-derived-mode typescript-tsx-mode typescript-mode "tsx")
   :config
-  (add-hook 'typescript-mode-hook (lambda () (setq-local compile-command "npm test"))))
+  (setq typescript-indent-level 2)
+  (add-hook 'typescript-mode #'subword-mode)
+  (add-hook 'typescript-mode-hook #'eglot-ensure)
+  (add-to-list 'auto-mode-alist '("\\.tsx?\\'" . typescript-tsx-mode)))
+
+;; source: https://github.com/emacs-tree-sitter/elisp-tree-sitter/issues/20
+(defun tree-sitter-mark-bigger-node ()
+  (interactive)
+  (let* ((p (point))
+         (m (or (mark) p))
+         (beg (min p m))
+         (end (max p m))
+         (root (ts-root-node tree-sitter-tree))
+         (node (ts-get-descendant-for-position-range root beg end))
+         (node-beg (ts-node-start-position node))
+         (node-end (ts-node-end-position node)))
+    ;; Node fits the region exactly. Try its parent node instead.
+    (when (and (= beg node-beg) (= end node-end))
+      (when-let ((node (ts-get-parent node)))
+        (setq node-beg (ts-node-start-position node)
+              node-end (ts-node-end-position node))))
+    (set-mark node-end)
+    (goto-char node-beg)))
+
+;; set this to languages that tree-sitter supports (golang, typescript)
+;; TODO: check how this is different from go-guru-expand
+;; (setq er/try-expand-list '(tree-sitter-mark-bigger-node))
+
+(use-package tree-sitter
+  :hook ((typescript-mode . tree-sitter-hl-mode)
+         (typescript-tsx-mode . tree-sitter-hl-mode)
+         (go-mode . tree-sitter-hl-mode)))
+
+(use-package tree-sitter-langs
+  :after tree-sitter
+  :config
+  (tree-sitter-require 'tsx)
+  (add-to-list 'tree-sitter-major-mode-language-alist '(typescript-tsx-mode . tsx)))
 
 (use-package json-mode
   :defer t)
@@ -1355,20 +1219,17 @@ returns non-nil. If all hooks return nil it executes
   (eval-after-load 'js2-mode
     '(add-hook 'js2-mode-hook '(add-hook 'before-save-hook 'eslint-fix nil t))))
 
-(use-package web-mode
-  :defer t
-  ;:mode ("\\.html?\\'" . web-mode)
-  :config
-  (progn
-    (add-to-list 'auto-mode-alist '("\\.html?\\'" . web-mode))
-    (add-to-list 'auto-mode-alist '("\\.tsx\\'" . web-mode))))
+;; (use-package web-mode
+;;   :defer t
+;;   ;; :mode ("\\.html?\\'" . web-mode)
+;;   :config
+;;   (add-to-list 'auto-mode-alist '("\\.html?\\'" . web-mode))
+;;   (add-to-list 'auto-mode-alist '("\\.tsx\\'" . web-mode)))
 
 (use-package prettier
   :defer t
-  :config
-  (progn
-    (add-to-list 'auto-mode-alist '("\\.jsx?\\'" . prettier-mode))
-    (add-to-list 'auto-mode-alist '("\\.tsx?\\'" . prettier-mode))))
+  :hook ((typescript-mode . prettier-mode)
+         (web-mode . prettier-mode)))
 
 (use-package emmet-mode
   :defer t
@@ -1387,21 +1248,8 @@ returns non-nil. If all hooks return nil it executes
 (use-package swift-mode
   :defer t)
 
-(use-package flycheck-swift3
-  :defer t
-  :config
-  (with-eval-after-load 'flycheck
-    (add-hook 'flycheck-mode-hook #'flycheck-swift3-setup)))
-
-(use-package flycheck-objc-clang
-  :defer t
-  :config
-  (with-eval-after-load 'flycheck
-    (add-hook 'flycheck-mode-hook #'flycheck-objc-clang-setup)))
-
 (use-package which-key
   :defer 2
-  :diminish (which-key-mode . " Ⓚ")
   :config
   (which-key-mode)
   (setq which-key-use-C-h-commands nil))
@@ -1410,8 +1258,7 @@ returns non-nil. If all hooks return nil it executes
   :diminish guru-mode
   :hook (prog-mode)
   :config
-  (progn
-    (setq guru-warn-only t)))
+  (setq guru-warn-only t))
 
 (use-package nand2tetris
   :disabled t
@@ -1420,54 +1267,6 @@ returns non-nil. If all hooks return nil it executes
   (add-to-list 'auto-mode-alist '("\\.hdl\\'" . nand2tetris-mode))
   (setq nand2tetris-core-base-dir "~/Development/nand2tetris"))
 
-;; old packages
-
-
-;; (use-package highlight-symbol
-;;   :disabled t
-;;   :config
-;;   (highlight-symbol-mode))
-
-;; (use-package highlight-indentation
-;;   :disabled t
-;;   :config
-;;   (highlight-indentation-mode))
-
-;; (use-package indent-guide
-;;   :disabled t
-;;   :diminish indent-guide-mode
-;;   :config
-;;   (indent-guide-global-mode))
-
-;; (use-package diff-hl
-;;   :disabled t
-;;   :config
-;;   (global-diff-hl-mode))
-
-;; (use-package fill-column-indicator
-;;   :disabled t
-;;   :defer 2
-;;   :config
-;;   (fci-mode))
-
-;; (use-package iedit
-;;   :disabled true
-;;   :bind ("C-;" . iedit-mode))
+(load custom-file 'noerror 'nomessage)
 
 ;;; init.el ends here
-(custom-set-variables
- ;; custom-set-variables was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- '(custom-safe-themes
-   '("0d01e1e300fcafa34ba35d5cf0a21b3b23bc4053d388e352ae6a901994597ab1" "246a9596178bb806c5f41e5b571546bb6e0f4bd41a9da0df5dfbca7ec6e2250c" "835868dcd17131ba8b9619d14c67c127aa18b90a82438c8613586331129dda63" default))
- '(package-selected-packages
-   '(nand2tetris jsonnet-mode lispy lispi yaml-mode winum which-key web-mode use-package treemacs-projectile treemacs-magit treemacs-icons-dired tide terraform-mode swift-mode smooth-scrolling smartparens ripgrep restclient rainbow-mode rainbow-delimiters protobuf-mode paradox nasm-mode multiple-cursors move-text lsp-ui json-mode js2-mode hungry-delete guru-mode gotest google-c-style golden-ratio go-rename go-guru go-eldoc go-add-tags git-gutter flycheck-swift3 flycheck-package flycheck-objc-clang flycheck-irony flycheck-gometalinter flx expand-region exec-path-from-shell eslint-fix ensime emmet-mode editorconfig doom-themes doom-modeline dockerfile-mode diminish counsel company-lsp company-irony company-go company-c-headers company-anaconda clang-format browse-kill-ring bazel-mode anzu amx add-node-modules-path ace-link))
- '(paradox-github-token t))
-(custom-set-faces
- ;; custom-set-faces was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- )
