@@ -282,8 +282,10 @@ adding to `kill-ring'."
   (setq auth-sources
         '(macos-keychain-internet)))
 
+;; From https://oremacs.com/2014/12/23/upcase-word-you-silly/
 (defun setup-better-capitalize-word ()
-  "From https://oremacs.com/2014/12/23/upcase-word-you-silly/."
+  "Changes case functions to start from the beginning of a word
+instead of from point."
   (defadvice capitalize-word (before capitalize-word-advice activate)
     (unless (or (looking-back "\\b")
                 (bound-and-true-p subword-mode))
@@ -349,11 +351,16 @@ adding to `kill-ring'."
   (setup-folders)
   (autoload 'View-scroll-half-page-forward "view")
   (autoload 'View-scroll-half-page-backward "view")
-  (global-set-key (kbd "C-v") 'View-scroll-half-page-forward)
-  (global-set-key (kbd "M-v") 'View-scroll-half-page-backward)
-  (global-set-key (kbd "M-z") 'zap-up-to-char)
-  (global-set-key (kbd "C-?") 'help-command)
-  (global-set-key (kbd "C-h") 'delete-backward-char))
+  (keymap-global-set "C-v" 'View-scroll-half-page-forward)
+  (keymap-global-set "M-v" 'View-scroll-half-page-backward)
+  (keymap-global-set "M-z" 'zap-up-to-char)
+  (keymap-global-set "C-?" 'help-command)
+  (keymap-global-set "C-h" 'delete-backward-char)
+  (keymap-global-set "M-u" 'upcase-dwim)
+  (keymap-global-set "M-l" 'downcase-dwim)
+  (keymap-global-set "M-c" 'capitalize-dwim)
+  ;; This frees M-\ because `cycle-spacing' does both.
+  (keymap-global-set "M-SPC" 'cycle-spacing))
 
 (setq custom-file (locate-user-emacs-file "custom.el"))
 
@@ -361,6 +368,8 @@ adding to `kill-ring'."
   "Init UI relating settings.
 FRAME is received from `after-make-frame-functions'."
   (disable-ui)
+  (push '(width . 220) default-frame-alist)
+  (push '(height . 60) default-frame-alist)
   (setup-font)
   (setup-modeline-font)
   (setup-window-divider)
@@ -434,8 +443,8 @@ returns non-nil. If all hooks return nil it executes
                               (codesuki--display-buffer-in-side-window)
                               (side . right))
                               ;; this one does not close on C-g. This was because the debugger was on.
-                             ("\\*Backtrace\\*"
-                              (codesuki--display-buffer-in-side-window))
+                             ;; ("\\*Backtrace\\*"
+                             ;;  (codesuki--display-buffer-in-side-window))
                              ("\\*eldoc\\*"
                               (codesuki--display-buffer-in-side-window))
                              ("\\*Compile-Log\\*"
@@ -447,7 +456,9 @@ returns non-nil. If all hooks return nil it executes
                               (window-parameters (mode-line-format . none))))) ;; modeline should be hidden and switch to it
 
 ;; built-in but newer versions on elpa
-(use-package xref)
+(use-package xref
+  :config
+  (setq xref-search-program 'ripgrep))
 
 (use-package eldoc
   :diminish eldoc-mode
@@ -613,7 +624,7 @@ returns non-nil. If all hooks return nil it executes
   (add-hook 'org-agenda-mode-hook (lambda () (setq-local show-trailing-whitespace nil)))
   (setq org-startup-indented t)
   (setq org-agenda-start-with-follow-mode t)
-  (setq org-pretty-entities t)
+  (setq org-pretty-entities nil)
   (setq org-agenda-window-setup 'reorganize-frame)
   ;; if we use `reorganize-frame` then using the below will cause all other
   ;; windows to be deleted
@@ -642,15 +653,27 @@ returns non-nil. If all hooks return nil it executes
   (setq org-capture-templates
         `(("i" "Inbox" entry  (file "inbox.org")
            ,(concat "* TODO %?\n"
-                    "%U\n"))
+                    ":PROPERTIES:\n"
+                    ":CREATED: %U\n"
+                    ":END:\n"))
+          ("m" "Meeting" entry  (file "inbox.org")
+           ,(concat "* TODO %^{Name or topic}\n"
+                    ":PROPERTIES:\n"
+                    ":CREATED: %U\n"
+                    ":END:\n"
+                    "\n"
+                    "Participants: %^{Participants}\n"
+                    "\n"
+                    "%?"
+                    ))
           ("b"
            "bookmark"
            entry
            (file "inbox.org")
            "* %:description\nSource: %:link\n%i\n"
            :immediate-finish t)))
-  (global-set-key (kbd "C-c c") #'org-capture)
-  (global-set-key (kbd "C-c a") #'org-agenda)
+  (keymap-global-set "C-c c" #'org-capture)
+  (keymap-global-set "C-c a" #'org-agenda)
   ;; (org-babel-do-load-languages 'org-babel-load-languages '((C . t)))
   )
 
@@ -712,7 +735,7 @@ returns non-nil. If all hooks return nil it executes
 
 (use-package goto-chg
   :config
-  (global-set-key (kbd "C-\\") 'goto-last-change))
+  (keymap-global-set "C-\\" 'goto-last-change))
 
 (use-package hungry-delete
   :diminish hungry-delete-mode
@@ -740,12 +763,15 @@ returns non-nil. If all hooks return nil it executes
   (er/enable-mode-expansions 'go-mode 'er/add-go-mode-expansions))
 
 (use-package multiple-cursors
-  :bind (("C-;" . mc/mark-all-like-this)
+  :bind (("C-;" . mc/mark-all-dwim)
          ("C->" . mc/mark-next-like-this)
          ("C-<" . mc/mark-previous-like-this)))
 
 (use-package avy
-  :bind (("C-'" . avy-goto-char-timer)
+  ;; Default for M-i is `tab-to-tab-stop', which is useless. Alternatively use C-i which is the same as TAB. Another
+  ;; good choice would be C-j for jump. It is `electric-newline-and-maybe-indent'. Turns out using C-j instead of RET
+  ;; might be easier because it's on the home row.
+  :bind (("M-i" . avy-goto-char-timer)
          ;; ("C-\"" . avy-move-region)
          ;; ("C-:" . avy-kill-region)
          ;; ("s-g" . avy-goto-line)
@@ -963,8 +989,6 @@ returns non-nil. If all hooks return nil it executes
   ;; enabled right away. Note that this forces loading the package.
   (marginalia-mode))
 
-(setq mac-command-modifier 'meta)
-
 (use-package consult
   :bind (;; C-c bindings (mode-specific-map)
          ;; ("C-c h" . consult-history)
@@ -1062,6 +1086,8 @@ returns non-nil. If all hooks return nil it executes
 
 (use-package emacs
   :init
+  (setq mac-command-modifier 'meta)
+
   ;; flex can become very slow.
   ;; (setq completion-styles '(basic substring partial-completion flex))
   ;; (setq completion-styles '(basic substring partial-completion))
