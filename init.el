@@ -212,49 +212,57 @@
         '(read-only t point-entered minibuffer-avoid-prompt face minibuffer-prompt)))
 
 ;; from https://github.com/purcell/emacs.d/blob/master/lisp/init-windows.el
-(defun split-window-func-with-other-buffer (split-function)
-  (lambda (&optional arg)
-    "Split this window and switch to the new window unless ARG is provided."
-    (interactive "P")
-    (funcall split-function)
-    (let ((target-window (next-window)))
-      (set-window-buffer target-window (other-buffer))
-      (unless arg
-        (select-window target-window)))))
+(defmacro codesuki--with-other-buffer (split-function)
+  `(defun ,(intern (concat "codesuki--with-other-buffer-" (symbol-name split-function))) (arg)
+     "Split this window and switch to the new window unless ARG is provided."
+          (interactive "P")
+          (funcall ',split-function)
+          (let ((target-window (next-window)))
+            (set-window-buffer target-window (other-buffer))
+            (unless arg
+              (select-window target-window)))))
 
 (defun setup-window-splitting ()
-      (global-set-key (kbd "C-x 2") (split-window-func-with-other-buffer #'split-window-below))
-      (global-set-key (kbd "C-x 3") (split-window-func-with-other-buffer #'split-window-horizontally)))
+      (global-set-key (kbd "C-x 2") (codesuki--with-other-buffer split-window-below))
+      (global-set-key (kbd "C-x 3") (codesuki--with-other-buffer split-window-horizontally)))
 
-(defun kill-region-or-backward-kill-word (&optional arg region)
-  "`kill-region' if the region is active, otherwise `backward-kill-word'"
+;; TODO: consider not doing this in comments because we might want to delete whitespace.
+(defun codesuki-delete-syntax (arg)
+  "Delete characters forward until encountering the end of a syntax element.
+With argument ARG, do this that many times."
+  (interactive "p")
+  (delete-region (point) (progn (forward-same-syntax arg) (point))))
+
+(defun codesuki-backward-delete-syntax (arg)
+  "Delete characters backward until encountering the beginning of a syntax element.
+With argument ARG, do this that many times."
+  (interactive "p")
+  (codesuki-delete-syntax (- arg)))
+
+(defun kill-region-or-backward-delete-syntax (&optional arg region)
+  "`kill-region' if the region is active, otherwise
+`backward-kill-word'. Also inhibits `backward-kill-word' from
+adding to `kill-ring'."
   (interactive
    (list (prefix-numeric-value current-prefix-arg) (use-region-p)))
   (if region
       (kill-region (region-beginning) (region-end))
-    (backward-kill-word arg)))
+    (codesuki-backward-delete-syntax arg)))
 
 (defun setup-kill-backwards-word ()
-  (global-set-key (kbd "C-w") 'kill-region-or-backward-kill-word))
+  (global-set-key (kbd "C-w") 'kill-region-or-backward-delete-syntax))
 
-;; from doom emacs
-(defun doom/delete-backward-word (arg)
-  "Like `backward-kill-word', but doesn't affect the kill-ring."
-  (interactive "p")
-  (let (kill-ring)
-    (ignore-errors (backward-kill-word arg))))
+(defun codesuki-kill-line (&optional arg)
+  "Behaves like `kill-whole-line' when `arg' is provided."
+  (interactive "P")
+  (if arg
+      ;; C-u defaults to 4, but with `(interactive "P")' we actually get `(4)'.
+      ;; `C-u 4' gives us 4. So we know which one was pressed.
+      (let ((arg (if (listp arg) 1 arg)))
+            (kill-whole-line arg))
+        (kill-line arg)))
 
-;; (defun codesuki/kill-syntax (arg)
-;;   "Kill characters forward until encountering the end of a word.
-;; With argument ARG, do this that many times."
-;;   (interactive "p")
-;;   (kill-region (point) (progn (forward-same-syntax arg) (point))))
-
-;; (defun codesuki/backward-kill-syntax (arg)
-;;   "Kill characters backward until encountering the beginning of a word.
-;; With argument ARG, do this that many times."
-;;   (interactive "p")
-;;   (codesuki/kill-syntax (- arg)))
+(keymap-global-set "C-k" 'codesuki-kill-line)
 
 (defun move-beginning-of-line-or-indent ()
   (interactive)
