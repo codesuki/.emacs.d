@@ -509,6 +509,11 @@ returns non-nil. If all hooks return nil it executes
 (use-package autorevert
   :diminish auto-revert-mode)
 
+(use-package repeat
+  :config
+  ;; (describe-repeat-maps) to see all possibilities.
+  (repeat-mode))
+
 (use-package mwheel
   :straight nil
   :config
@@ -702,8 +707,13 @@ returns non-nil. If all hooks return nil it executes
   ;; If using org-roam-protocol
   (require 'org-roam-protocol))
 
+;; maybe move this to display-buffer-alist for consistency
+(defun codesuki--elfeed-display-buffer (buffer &optional action)
+  (pop-to-buffer buffer '((display-buffer-below-selected) (dedicated 'elfeed) (window-height 100))))
+
 (use-package elfeed
   :config
+  (setq elfeed-show-entry-switch 'codesuki--elfeed-display-buffer)
   (setq elfeed-db-directory (to-local-path "elfeed")))
 
 (use-package elfeed-org
