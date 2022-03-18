@@ -511,6 +511,8 @@ returns non-nil. If all hooks return nil it executes
 (use-package autorevert
   :diminish auto-revert-mode)
 
+(setq set-mark-command-repeat-pop t)
+
 (use-package repeat
   :config
   ;; (describe-repeat-maps) to see all possibilities.
