@@ -192,7 +192,7 @@
   (setq window-combination-resize t)
   (setq-default fill-column 80)
   (setq-default indent-tabs-mode nil)
-  (setq-default show-trailing-whitespace 't)
+  (add-hook 'prog-mode-hook (lambda () (setq show-trailing-whitespace t)))
   (setq-default indicate-empty-lines 't)
   (setq save-interprogram-paste-before-kill t)
   (setq-default sentence-end-double-space nil)
@@ -626,7 +626,6 @@ returns non-nil. If all hooks return nil it executes
 (use-package org
   :config
   (add-hook 'org-indent-mode-hook (lambda () (setup-org-faces)))
-  (add-hook 'org-agenda-mode-hook (lambda () (setq-local show-trailing-whitespace nil)))
   (setq org-startup-indented t)
   (setq org-agenda-start-with-follow-mode t)
   (setq org-pretty-entities nil)
