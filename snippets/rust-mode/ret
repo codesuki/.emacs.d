@@ -1,6 +1,0 @@
-# -*- mode: snippet -*-
-# name: return
-# key: ret
-# uuid: ret
-# --
-return ${1:`%`};$0

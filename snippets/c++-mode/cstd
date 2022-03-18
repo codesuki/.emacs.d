@@ -1,6 +1,0 @@
-# -*- mode: snippet -*-
-# name: cstd
-# key: cstd
-# uuid: cstd
-# --
-#include <cstdlib>

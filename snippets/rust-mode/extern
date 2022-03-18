@@ -1,9 +1,0 @@
-# -*- mode: snippet -*-
-# name: extern "C" { ... }
-# key: extc
-# uuid: extc
-# condition: (doom-snippets-bolp)
-# --
-extern "C" {
-    `%`$0
-}

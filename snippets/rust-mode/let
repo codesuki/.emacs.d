@@ -1,6 +1,0 @@
-# -*- mode: snippet -*-
-# name: let
-# key: let
-# uuid: let
-# --
-let ${1:var} = $0`(if (eolp) ";" "")`

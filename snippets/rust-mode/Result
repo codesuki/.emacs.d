@@ -1,6 +1,0 @@
-# -*- mode: snippet -*-
-# name: Result<T, E>
-# key: res
-# uuid: res
-# --
-Result<${1:T}, ${2:()}>

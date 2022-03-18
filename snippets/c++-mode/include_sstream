@@ -1,6 +1,0 @@
-# -*- mode: snippet -*-
-# name: #include <sstream>
-# key: iss
-# uuid: iss
-# --
-#include <sstream>

@@ -1,6 +1,0 @@
-# -*- mode: snippet -*-
-# name: d_operator[]_const
-# key: c[
-# uuid: c[
-# --
-const ${1:Type}& operator[](${2:int index}) const;

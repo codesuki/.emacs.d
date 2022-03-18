@@ -1,4 +1,0 @@
-# -*- mode: snippet -*-
-# name: go
-# --
-go ${1:func}(${2:args})$0

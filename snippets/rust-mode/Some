@@ -1,6 +1,0 @@
-# -*- mode: snippet -*-
-# name: Some(...)
-# key: so
-# uuid: so
-# --
-Some(${1:`%`})

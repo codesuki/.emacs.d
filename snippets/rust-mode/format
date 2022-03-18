@@ -1,6 +1,0 @@
-# -*- mode: snippet -*-
-# name: format!(..., ...)
-# key: f
-# uuid: f
-# --
-format!("$1", ${2:`%`})

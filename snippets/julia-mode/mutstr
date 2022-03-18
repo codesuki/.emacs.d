@@ -1,7 +1,0 @@
-# -*- mode: snippet -*-
-# name: mutable struct ... end
-# key: mutstr
-# --
-mutable struct ${1:name}
-    `%`$0
-end

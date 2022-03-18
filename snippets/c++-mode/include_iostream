@@ -1,6 +1,0 @@
-# -*- mode: snippet -*-
-# name: #include <iostream>
-# key: iio
-# uuid: iio
-# --
-#include <iostream>

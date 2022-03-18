@@ -1,7 +1,0 @@
-# -*- mode: snippet -*-
-# name: item
-# key: -
-# uuid: -
-# condition: (not (save-restriction (widen) (texmathp)))
-# --
-\item ${0:`%`}

@@ -1,4 +1,0 @@
-# -*- mode: snippet -*-
-# name: http request writer
-# --
-w http.ResponseWriter, r *http.Request

@@ -935,6 +935,10 @@ returns non-nil. If all hooks return nil it executes
   :config
   (yas-global-mode))
 
+(use-package doom-snippets
+  :after yasnippet
+  :straight (doom-snippets :type git :host github :repo "hlissner/doom-snippets" :files ("*.el" "*")))
+
 (use-package flymake
   :config
   (remove-hook 'flymake-diagnostic-functions 'flymake-proc-legacy-flymake)

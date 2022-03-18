@@ -1,6 +1,0 @@
-# -*- mode: snippet -*-
-# name: ostream
-# key: os
-# uuid: os
-# --
-#include <ostream>

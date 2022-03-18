@@ -1,4 +1,0 @@
-# -*- mode: snippet -*-
-# name: println (short)
-# --
-fmt.Println("${1:msg}")$0

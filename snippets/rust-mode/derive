@@ -1,7 +1,0 @@
-# -*- mode: snippet -*-
-# name: #[derive(...)]
-# key: der
-# uuid: der
-# condition: (doom-snippets-bolp)
-# --
-#[derive($1)]

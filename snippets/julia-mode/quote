@@ -1,7 +1,0 @@
-# -*- mode: snippet -*-
-# name: quote ... end
-# key: quote
-# --
-quote
-    `%`$0
-end

@@ -1,8 +1,0 @@
-# -*- mode: snippet -*-
-# name: else { ... }
-# key: el
-# uuid: el
-# --
-else {
-    `%`$0
-}

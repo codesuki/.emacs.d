@@ -1,9 +1,0 @@
-# -*- mode: snippet -*-
-# name: #!/usr/bin/env php
-# key: #!
-# uuid: #!
-# --
-#!/usr/bin/env php
-<?php
-
-$0
