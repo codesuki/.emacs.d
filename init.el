@@ -199,11 +199,16 @@
   (setq column-number-mode t)
   (blink-cursor-mode 0)
   (setq use-short-answers t)
-  (setq make-backup-files nil)
+  ;; backup files could be useful.
+  ;;  (setq make-backup-files nil)
+  (setq backup-directory-alist '(("." . "~/.emacs.d/.local/backups")))
+
   (setq delete-by-moving-to-trash t)
   (setq use-dialog-box nil)
   (setq confirm-kill-processes nil)
   (setq load-prefer-newer t)
+  ;; this is only useful if you edit the same file from different emacs instances.
+  (setq create-lockfiles nil)
   (unless (file-exists-p auto-save-path)
     (make-directory auto-save-path t))
   (setq auto-save-file-name-transforms
@@ -339,7 +344,7 @@ instead of from point."
   (setq url-cache-directory (to-local-path "url/cache/"))
   (setq url-configuration-directory (to-local-path "url/"))
   (setq url-cookie-file (to-local-path "url/cookies.el"))
-  (setq url-history-file(to-local-path "url/history.el"))
+  (setq url-history-file (to-local-path "url/history.el"))
   (setq save-place-file (to-local-path "saveplace.el"))
   (setq savehist-file (to-local-path "savehist.el")))
 
@@ -612,7 +617,6 @@ returns non-nil. If all hooks return nil it executes
   :config
   (setq calendar-holidays (append holiday-christian-holidays japanese-holidays)))
 
-(require 'cl-lib)
 ;; (defun codesuki--org-agenda-inhibit-frame-change (fn &rest args)
 ;;   "This function prevents `org-agenda` to change the frame."
 ;;   (cl-letf (((symbol-function 'delete-other-windows) #'ignore)
