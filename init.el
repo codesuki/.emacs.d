@@ -273,6 +273,14 @@ adding to `kill-ring'."
 (defun setup-move-beginning-of-line-or-indent ()
   (global-set-key (kbd "C-a") 'move-beginning-of-line-or-indent))
 
+(require 'cl-lib)
+(defun codesuki-pop-global-mark ()
+  (interactive)
+  (cl-letf (((symbol-function 'switch-to-buffer) #'pop-to-buffer))
+    (pop-global-mark)))
+
+(global-set-key [remap pop-global-mark] 'codesuki-pop-global-mark)
+
 (defun setup-undo-limits ()
   (setq undo-limit 80000000)
   (setq undo-strong-limit 12000000)
