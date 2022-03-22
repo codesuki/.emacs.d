@@ -564,9 +564,7 @@ returns non-nil. If all hooks return nil it executes
   (delete-selection-mode))
 
 ;; If a file changes on disk reload it in Emacs.
-(use-package autorevert
-  :init
-  (global-auto-revert-mode))
+(use-package autorevert)
 
 (use-package simple
   :straight (:type built-in)
@@ -581,7 +579,7 @@ returns non-nil. If all hooks return nil it executes
   (repeat-mode))
 
 (use-package mwheel
-  :straight nil
+  :straight (:type built-in)
   :config
   ;; I want it to scroll 1 line at a time.
   (setq scroll-margin 0)
@@ -593,7 +591,7 @@ returns non-nil. If all hooks return nil it executes
   (setq mouse-wheel-scroll-amount '(1 ((shift) . hscroll))))
 
 (use-package dired-x
-  :straight nil)
+  :straight (:type built-in))
 
 ;; `ibuffer' is a nicer buffer list.
 (use-package ibuffer
@@ -674,9 +672,11 @@ returns non-nil. If all hooks return nil it executes
 (use-package helpful
   :defer t
   :config
-  (define-key help-map (kbd "f") #'helpful-callable)
-  (define-key help-map (kbd "v") #'helpful-variable)
-  (define-key help-map (kbd "k") #'helpful-key))
+  (global-set-key [remap describe-function] #'helpful-callable)
+  (global-set-key [remap describe-command] #'helpful-command)
+  (global-set-key [remap describe-variable] #'helpful-variable)
+  (global-set-key [remap describe-key] #'helpful-key)
+  (global-set-key [remap describe-symbol] #'helpful-symbol))
 
 ;; I use variable pitch fonts but some things like tables need to be fixed width.
 (defun setup-org-faces ()
@@ -928,7 +928,7 @@ returns non-nil. If all hooks return nil it executes
 	 ;; ("M-g o" . consult-outline)               ;; Alternative: consult-org-heading
 	 ;; ("M-g m" . consult-mark)
 	 ;; ("M-g k" . consult-global-mark)
-	 ;; ("M-g i" . consult-imenu)
+	 ("M-g i" . consult-imenu)
 	 ;; ("M-g I" . consult-imenu-multi)
 	 ;; M-s bindings (search-map)
 	 ;; ("M-s d" . consult-find)
