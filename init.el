@@ -341,9 +341,21 @@
 ;; want to delete whitespace.
 (defun codesuki-delete-syntax (arg)
   "Delete characters forward until encountering the end of a syntax element.
-With argument ARG, do this that many times."
+With argument ARG, do this that many times. Use `words' when
+inside a comment."
   (interactive "p")
-  (delete-region (point) (progn (forward-same-syntax arg) (point))))
+  (let* ((word-end (progn (save-excursion (forward-word arg) (point))))
+	 (syntax-end (progn (save-excursion (forward-same-syntax arg) (point))))
+	 (faces (progn
+		  (let ((maybe-list (get-text-property word-end 'face)))
+		    (if (listp maybe-list)
+			maybe-list
+		      (list maybe-list))))))
+    ;; Leave this in to find other faces.
+    (message "%s %s" word-end faces)
+    (if (memq 'font-lock-comment-face faces)
+	(delete-region (point) word-end)
+      (delete-region (point) syntax-end))))
 
 (defun codesuki-backward-delete-syntax (arg)
   "Delete characters backward until encountering the beginning of a syntax element.
