@@ -168,7 +168,7 @@
 
 ;; Normally the minibuffer prompt is editable which can be annoying.
 (setq minibuffer-prompt-properties
-      '(read-only t point-entered minibuffer-avoid-prompt face minibuffer-prompt))
+      '(read-only t cursor-intangible t face minibuffer-prompt))
 
 ;; Disable bidirectional text support because we don't need it. This apparently
 ;; gives a slight speed boost.
@@ -298,12 +298,14 @@
 (setq completion-ignore-case t)
 (setq tab-always-indent 'complete)
 
-(defun setup-minibuffer ()
-  ;; from doom emacs.
-  "Keep the cursor out of the read-only portion of the minibuffer."
-  ;; Try to keep the cursor out of the read-only portions of the minibuffer.
-  (setq minibuffer-prompt-properties '(read-only t intangible t cursor-intangible t face minibuffer-prompt))
-  (add-hook 'minibuffer-setup-hook #'cursor-intangible-mode))
+;; Check out pulse.
+;; (defun pulse-line (&rest _)
+;;       "Pulse the current line."
+;;       (pulse-momentary-highlight-one-line (point)))
+
+;; (dolist (command '(scroll-up-command scroll-down-command
+;;                    recenter-top-bottom other-window))
+;;   (advice-add command :after #'pulse-line))
 
 ;; (defun setup-term-font ()
 ;;   '(term ((t (:background "#292b2e" :foreground "#b2b2b2" :family "InputCustomMonoCompressed")))))
@@ -321,9 +323,8 @@
 	    (unless arg
 	      (select-window target-window)))))
 
-(defun setup-window-splitting ()
-      (keymap-global-set "C-x 2" (codesuki--with-other-buffer split-window-below))
-      (keymap-global-set "C-x 3" (codesuki--with-other-buffer split-window-horizontally)))
+(keymap-global-set "C-x 2" (codesuki--with-other-buffer split-window-below))
+(keymap-global-set "C-x 3" (codesuki--with-other-buffer split-window-horizontally))
 
 ;; I like using `C-w' to delete (not kill) words backwards. But with programming
 ;; languages I want it to respect braces. E.g.
@@ -373,7 +374,7 @@ adding to `kill-ring'."
       (kill-region (region-beginning) (region-end))
     (codesuki-backward-delete-syntax arg)))
 
-(keymap-global-set "C-w" 'kill-region-or-backward-delete-syntax)
+(keymap-set prog-mode-map "C-w" 'kill-region-or-backward-delete-syntax)
 
 ;; `C-S-<backspace>' is quite hard to press. I want to try to use `C-u C-k'
 ;; instead. Numerical arguments still work to delete whole lines.
@@ -388,6 +389,17 @@ adding to `kill-ring'."
 	(kill-line arg)))
 
 (keymap-global-set "C-k" 'codesuki-kill-line)
+(keymap-global-set "C-S-k" 'kill-line)
+
+;; Sometimes I just want to open a line above the current one. It's possible to
+;; do this manually via `C-a' followed by `C-o'.
+(defun codesuki-open-line-above (arg)
+  (interactive "p")
+  (save-excursion
+    (beginning-of-line)
+    (open-line arg)))
+
+(keymap-global-set "C-S-o" 'codesuki-open-line-above)
 
 ;; Instead of pressing `M-m' I prefer to re-use `C-a' to switch between
 ;; `beginning-of-line' and `back-to-indentation'.
@@ -411,20 +423,29 @@ adding to `kill-ring'."
 
 ;; From https://oremacs.com/2014/12/23/upcase-word-you-silly/
 ;; Normally the case functions behave quite weirdly. They change case starting
-;; from the cursor location.
-(defun setup-better-capitalize-word ()
-  "Changes case functions to start from the beginning of a word
-instead of from point."
-  (defadvice capitalize-word (before capitalize-word-advice activate)
-    (unless (or (looking-back "\\b")
-		(bound-and-true-p subword-mode))
-      (backward-word)))
-  (defadvice upcase-word (before upcase-word-advice activate)
-    (unless (looking-back "\\b")
-      (backward-word)))
-  (defadvice downcase-word (before downcase-word-advice activate)
-    (unless (looking-back "\\b")
-      (backward-word))))
+;; from the cursor location. Changes case functions to start from the beginning
+;; of a word instead of from point.
+(defun codesuki--case-advice ()
+  (unless (or (looking-back "\\b")
+	      (bound-and-true-p subword-mode))
+    (backward-word)))
+
+;; (advice-add 'capitalize-word :before 'codesuki--case-advice)
+;; (advice-add 'upcase-word :before 'codesuki--case-advice)
+;; (advice-add 'downcase-word :before 'codesuki--case-advice)
+
+;; (defadvice capitalize-word (before capitalize-word-advice activate)
+;;   (unless (or (looking-back "\\b")
+;;	      (bound-and-true-p subword-mode))
+;;     (backward-word)))
+
+;; (defadvice upcase-word (before upcase-word-advice activate)
+;;   (unless (looking-back "\\b")
+;;     (backward-word)))
+
+;; (defadvice downcase-word (before downcase-word-advice activate)
+;;   (unless (looking-back "\\b")
+;;     (backward-word)))
 
 (defun codesuki-recompile-all ()
   "Recompile all packages."
@@ -438,6 +459,7 @@ instead of from point."
 returns non-nil. If all hooks return nil it executes
 `keyboard-quit'."
   (interactive)
+  ;; TODO: also close minibuffer.
   (unless (run-hook-with-args-until-success 'codesuki--quit-hook)
     (keyboard-quit)))
 
@@ -581,6 +603,8 @@ returns non-nil. If all hooks return nil it executes
 (use-package mwheel
   :straight (:type built-in)
   :config
+  (setq hscroll-margin 2)
+  (setq hscroll-step 1)
   ;; I want it to scroll 1 line at a time.
   (setq scroll-margin 0)
   (setq scroll-preserve-screen-position 'always)
@@ -619,7 +643,7 @@ returns non-nil. If all hooks return nil it executes
 ;; Otherwise those PATH variables are not available in GUI Emacs.
 (use-package exec-path-from-shell
   :config
-  (setq exec-path-from-shell-variables '("GOPATH" "PATH" "MANPATH"))
+  (setq exec-path-from-shell-variables '("GOPATH" "PATH" "MANPATH" "JAVA_HOME"))
   (setq exec-path-from-shell-arguments nil)
   (exec-path-from-shell-initialize))
 
@@ -659,13 +683,121 @@ returns non-nil. If all hooks return nil it executes
   :init
   (save-place-mode))
 
+;; I tend to use `dabbrev-expand' a lot, this way I get corfu's help.
+(use-package dabbrev
+  ;; Swap M-/ and C-M-/
+  :bind (("M-/" . dabbrev-completion)
+	 ("C-M-/" . dabbrev-expand)))
+
 ;; The built-in or soon-to-be built-in LSP client. Simple and good.
 (use-package eglot
   :defer t
   :config
+  (set-face-attribute 'eglot-highlight-symbol-face nil :inherit 'error)
+  ;;(setq eglot-events-buffer-size 0)
   (define-key eglot-mode-map (kbd "C-c r") 'eglot-rename)
-  (define-key eglot-mode-map (kbd "C-c o") 'eglot-code-action-organize-imports)
+  (define-key eglot-mode-map (kbd "C-c o") 'eglot-code-actions)
   (define-key eglot-mode-map (kbd "C-c h") 'eldoc))
+
+;; (add-to-list 'eglot-server-programs
+;;              `(java-mode . ("jdtls" "-configuration" "~/.cache/jdtls" "-data" "~/.emacs.d/jdtls")))
+
+;;; Setup specific to the Eclipse JDT setup in case one can't use the simpler 'jdtls' script
+(with-eval-after-load 'eglot
+  ;; Tell Eglot to use a specific class to handle java-mode files
+  (add-to-list 'eglot-server-programs '(java-mode . eglot--eclipse-jdt-contact))
+
+  (defun eglot--eclipse-jdt-contact (interactive)
+    "Return cons (CLASS . ARGS) for connecting to Eclipse JDT.
+If INTERACTIVE, prompt user for details."
+    (cl-labels
+        ((is-the-jar
+           (path)
+           (and (string-match-p
+                 "org\\.eclipse\\.equinox\\.launcher_.*\\.jar$"
+                 (file-name-nondirectory path))
+                (file-exists-p path))))
+      (let* ((classpath (or (getenv "CLASSPATH") path-separator))
+             (cp-jar (cl-find-if #'is-the-jar (split-string classpath path-separator)))
+             (jar cp-jar)
+             (dir
+              (cond
+               (jar (file-name-as-directory
+                     (expand-file-name ".." (file-name-directory jar))))
+               (interactive
+                (expand-file-name
+                 (read-directory-name
+                  (concat "Path to eclipse.jdt.ls directory (could not"
+                          " find it in CLASSPATH): ")
+                  nil nil t)))
+               (t (error "Could not find eclipse.jdt.ls jar in CLASSPATH"))))
+             (repodir
+              (concat dir
+                      "org.eclipse.jdt.ls.product/target/repository/"))
+             (repodir (if (file-directory-p repodir) repodir dir))
+             (config
+              (concat
+               repodir
+               (cond
+                ((string= system-type "darwin") "config_mac")
+                ((string= system-type "windows-nt") "config_win")
+                (t "config_linux"))))
+             (workspace
+              (expand-file-name (md5 (project-root (eglot--current-project)))
+                                (locate-user-emacs-file
+                                 "eglot-eclipse-jdt-cache"))))
+        (unless jar
+          (setq jar
+                (cl-find-if #'is-the-jar
+                            (directory-files (concat repodir "plugins") t))))
+        (unless (and jar (file-exists-p jar) (file-directory-p config))
+          (error "Could not find required eclipse.jdt.ls files (build required?)"))
+        (when (and interactive (not cp-jar)
+                   (y-or-n-p (concat "Add path to the server program "
+                                     "to CLASSPATH environment variable?")))
+          (setenv "CLASSPATH" (concat (getenv "CLASSPATH") path-separator jar)))
+        (unless (file-directory-p workspace)
+          (make-directory workspace t))
+        (cons 'eglot-eclipse-jdt
+              (list (executable-find "java")
+                    "-Declipse.application=org.eclipse.jdt.ls.core.id1"
+                    "-Dosgi.bundles.defaultStartLevel=4"
+                    "-Declipse.product=org.eclipse.jdt.ls.core.product"
+                    "-jar" jar
+                    "-configuration" config
+                    "-data" workspace)))))
+
+  ;; Define said class and its methods
+  (defclass eglot-eclipse-jdt (eglot-lsp-server) ()
+    :documentation "Eclipse's Java Development Tools Language Server.")
+
+  (cl-defmethod eglot-initialization-options ((server eglot-eclipse-jdt))
+    "Passes through required JDT initialization options."
+    `(:workspaceFolders
+      [,@(cl-delete-duplicates
+          (mapcar #'eglot--path-to-uri
+                  (let* ((root (project-root (eglot--project server))))
+                    (cons root
+                          (mapcar
+                           #'file-name-directory
+                           (append
+                            (file-expand-wildcards (concat root "*/pom.xml"))
+                            (file-expand-wildcards (concat root "*/build.gradle"))
+                            (file-expand-wildcards (concat root "*/.project")))))))
+          :test #'string=)]
+      ,@(if-let ((home (or (getenv "JAVA_HOME")
+                           (ignore-errors
+                             (expand-file-name
+                              ".."
+                              (file-name-directory
+                               (file-chase-links (executable-find "javac"))))))))
+            `(:settings (:java (:home ,home)))
+          (ignore (eglot--warn "JAVA_HOME env var not set")))))
+
+  (cl-defmethod eglot-execute-command
+    ((_server eglot-eclipse-jdt) (_cmd (eql java.apply.workspaceEdit)) arguments)
+    "Eclipse JDT breaks spec and replies with edits as arguments."
+    (mapc #'eglot--apply-workspace-edit arguments)))
 
 ;; Nicer display of function/macro/variable description. Actually shows the code
 ;; and callers.
@@ -727,6 +859,24 @@ returns non-nil. If all hooks return nil it executes
 ;; using reorganize-frame.
 (advice-add 'org-agenda-prepare-window :around 'codesuki--org-vertically-split-follow-mode-window)
 
+;; "https://towardsdatascience.com/the-experimentation-gap-3f5d374d354c"
+;; TODO:
+;; - feed to pandoc
+;; - download images, replace links
+(defun codesuki-url-to-org (url)
+  (let* ((buffer (url-retrieve-synchronously url))
+	 (html (with-current-buffer buffer
+		 (buffer-substring url-http-end-of-headers (point-max))))
+	 (dom
+	  (with-temp-buffer
+	    (insert html)
+	    (decode-coding-region (point-min) (point-max) 'utf-8)
+	    (libxml-parse-html-region (point-min) (point-max)))))
+    (eww-score-readability dom)
+    (with-temp-buffer
+      (shr-dom-print (eww-highest-readability dom))
+      (buffer-string))))
+
 (use-package org
   :config
   ;; In `org-mode' I prefer longer lines.
@@ -768,6 +918,7 @@ returns non-nil. If all hooks return nil it executes
 				       (search . " %i ")))))))
   (setq org-todo-keywords '((sequence "TODO(t!)" "WAIT(w!)" "DONE(d)")))
   (setq org-log-done 'time)
+  (setq org-log-into-drawer t)
   ;; When using variable pitch fonts the tags are not aligned. Alternatively
   ;; make headings fixed-width.
   (setq org-tags-column 0)
@@ -795,7 +946,10 @@ returns non-nil. If all hooks return nil it executes
 	   entry
 	   (file "inbox.org")
 	   "* %:description\nSource: %:link\n%i\n"
-	   :immediate-finish t)))
+	   :immediate-finish t)
+	  ("j" "Journal" entry  (file+olp+datetree "journal.org")
+	   ,(concat "* %^{What}\n"
+		    "%?"))))
   ;; Those are recommended and I like them.
   (keymap-global-set "C-c c" #'org-capture)
   (keymap-global-set "C-c a" #'org-agenda)
@@ -873,6 +1027,7 @@ returns non-nil. If all hooks return nil it executes
 ;; Shows completion candidates in a small popup.
 (use-package corfu
   :init
+  (setq corfu-preselect-first nil)
   (corfu-global-mode)
   (add-hook 'minibuffer-setup-hook #'corfu-enable-in-minibuffer))
 
@@ -974,9 +1129,8 @@ returns non-nil. If all hooks return nil it executes
   :bind
   (("C-." . embark-act)         ;; pick some comfortable binding
    ("M-." . embark-dwim))        ;; good alternative: M-.
-   ;;("C-h B" . embark-bindings)) ;; alternative for `describe-bindings'
+  ;;("C-h B" . embark-bindings)) ;; alternative for `describe-bindings'
   :init
-  ;; Optionally replace the key help with a completing-read interface
   (setq prefix-help-command #'embark-prefix-help-command)
   :config
   (define-key embark-file-map "o" #'codesuki-embark-ace-window-file)
@@ -1000,11 +1154,11 @@ returns non-nil. If all hooks return nil it executes
 (use-package unbound)
 
 ;; Show possible keys to press and their commands.
-(use-package which-key
-  :defer 2
-  :config
-  (which-key-mode)
-  (setq which-key-use-C-h-commands nil))
+;; (use-package which-key
+;;   :defer 2
+;;   :config
+;;   (which-key-mode)
+;;   (setq which-key-use-C-h-commands nil))
 
 ;; The best terminal support for Emacs.
 (use-package vterm)
@@ -1222,6 +1376,13 @@ returns non-nil. If all hooks return nil it executes
   (keyfreq-mode 1)
   (keyfreq-autosave-mode 1))
 
+(defun codesuki--organize-imports-and-format ()
+  ;; check if organize imports is available. or just ignore error.
+  (condition-case nil
+      (eglot-code-action-organize-imports (point-min))
+    (error nil))
+  (eglot-format-buffer)) 
+
 ;; Go support.
 (use-package go-mode
   :defer t
@@ -1230,9 +1391,9 @@ returns non-nil. If all hooks return nil it executes
   (add-hook 'go-mode-hook #'subword-mode)
   ;; I want LSP.
   (add-hook 'go-mode-hook #'eglot-ensure)
+  ;; Use goimports to format the file. It also fixes up imports.
   (setq gofmt-command "goimports")
-  ;;(add-hook 'before-save-hook #'gofmt-before-save)
-  )
+  (add-hook 'before-save-hook #'codesuki--organize-imports-and-format))
 
 ;; Provides useful things like jump to definition, list callers, etc. I wonder
 ;; when this will be superseeded by LSP.
@@ -1278,6 +1439,9 @@ returns non-nil. If all hooks return nil it executes
   :defer t
   :config
   (add-to-list 'auto-mode-alist '("\\.libsonnet\\'" . jsonnet-mode)))
+
+(use-package cue-mode
+   :straight  '(cue-mode :type git :host github :repo "russell/cue-mode"))
 
 ;; Many projects use this. So I am keeping it.
 (use-package google-c-style
@@ -1337,7 +1501,7 @@ returns non-nil. If all hooks return nil it executes
   (define-derived-mode typescript-tsx-mode typescript-mode "tsx")
   :config
   (setq typescript-indent-level 2)
-  (add-hook 'typescript-mode #'subword-mode)
+  (add-hook 'typescript-mode-hook #'subword-mode)
   (add-hook 'typescript-mode-hook #'eglot-ensure)
   (add-to-list 'auto-mode-alist '("\\.tsx?\\'" . typescript-tsx-mode)))
 
@@ -1400,6 +1564,9 @@ returns non-nil. If all hooks return nil it executes
   :defer t
   :config
   (add-hook 'terraform-mode-hook #'terraform-format-on-save-mode))
+
+(use-package groovy-mode
+  :defer t)
 
 ;; Swift support.
 (use-package swift-mode
