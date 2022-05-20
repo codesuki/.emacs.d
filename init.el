@@ -55,7 +55,7 @@
   (unless (file-exists-p bootstrap-file)
     (with-current-buffer
 	(url-retrieve-synchronously
-	 "https://github.com/raxod502/straight.el/blob/af5437f2afd00936c883124d6d3098721c2d306c/bootstrap.el"
+	 "https://raw.githubusercontent.com/radian-software/straight.el/99ba608ed85e8814d89f00e09f3d99d76ee4f3d3/install.el"
 	 'silent 'inhibit-cookies)
       (goto-char (point-max))
       (eval-print-last-sexp)))
@@ -1028,7 +1028,7 @@ If INTERACTIVE, prompt user for details."
 (use-package corfu
   :init
   (setq corfu-preselect-first nil)
-  (corfu-global-mode)
+  (global-corfu-mode)
   (add-hook 'minibuffer-setup-hook #'corfu-enable-in-minibuffer))
 
 ;; Minibuffer completion using `completion-at-point'. Simple and good.
