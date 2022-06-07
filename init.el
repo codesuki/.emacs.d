@@ -95,6 +95,9 @@
 ;; I like ending sentences with one space.
 (setq-default sentence-end-double-space nil)
 
+;; I like it when I can just keep pressing the same key
+(setq next-line-add-newlines t)
+
 ;; I want to know on which column I am.
 (setq column-number-mode t)
 
