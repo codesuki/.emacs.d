@@ -357,9 +357,12 @@ inside a comment."
 		      (list maybe-list))))))
     ;; Leave this in to find other faces.
     (message "%s %s" word-end faces)
-    (if (memq 'font-lock-comment-face faces)
-	(delete-region (point) word-end)
-      (delete-region (point) syntax-end))))
+    (cond ((memq 'font-lock-comment-face faces)
+	   (delete-region (point) word-end))
+	  ((> word-end syntax-end)
+	   (delete-region (point) word-end))
+	  (t
+	   (delete-region (point) syntax-end)))))
 
 (defun codesuki-backward-delete-syntax (arg)
   "Delete characters backward until encountering the beginning of a syntax element.
