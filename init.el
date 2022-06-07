@@ -1411,6 +1411,12 @@ returns non-nil. If all hooks return nil it executes
   (add-hook 'typescript-mode-hook #'eglot-ensure)
   (add-to-list 'auto-mode-alist '("\\.tsx?\\'" . typescript-tsx-mode)))
 
+;; This adds indent support to typescript/css/json via tree sitter.
+(use-package tsi
+  :straight '(tsi :type git :host github :repo "orzechowskid/tsi.el")
+  :init
+  (add-hook 'typescript-mode-hook #'tsi-typescript-mode))
+
 ;; I want to replace `expand-region' with this.
 ;; source: https://github.com/emacs-tree-sitter/elisp-tree-sitter/issues/20
 (defun tree-sitter-mark-bigger-node ()
@@ -1438,9 +1444,9 @@ returns non-nil. If all hooks return nil it executes
 ;; Provides an AST for languages. Mainly used for better syntax highlighting,
 ;; but has promise for more.
 (use-package tree-sitter
-  :hook ((typescript-mode . tree-sitter-hl-mode)
-	 (typescript-tsx-mode . tree-sitter-hl-mode)
-	 (go-mode . tree-sitter-hl-mode)))
+  :init
+  (global-tree-sitter-mode)
+  (add-hook 'tree-sitter-after-on-hook #'tree-sitter-hl-mode))
 
 (use-package tree-sitter-langs
   :after tree-sitter
