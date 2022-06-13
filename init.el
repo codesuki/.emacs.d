@@ -1056,10 +1056,15 @@ returns non-nil. If all hooks return nil it executes
   :hook
   (embark-collect-mode . consult-preview-at-point-mode))
 
+;; This package let's me edit grep buffers, so I can grep for a word in files
+;; and then edit them all at once.
+(use-package wgrep)
+
 ;; Shows you all unbound keys.
 (use-package unbound)
 
 ;; Show possible keys to press and their commands.
+;; Note: I am now using embark-prefix-help-command instead.
 ;; (use-package which-key
 ;;   :defer 2
 ;;   :config
