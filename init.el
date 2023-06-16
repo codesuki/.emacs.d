@@ -1326,30 +1326,46 @@ returns non-nil. If all hooks return nil it executes
   (condition-case nil
       (eglot-code-action-organize-imports (point-min))
     (error nil))
-  (eglot-format-buffer)) 
+  (eglot-format-buffer))
+
+(defun codesuki--configure-gopls-env ()
+  (make-local-variable 'process-environment)
+  (add-to-list 'process-environment "GOPACKAGESDRIVER=./tools/gopackagesdriver.sh")
+  )
 
 ;; Go support.
-(use-package go-mode
-  :defer t
+(use-package go-ts-mode
   :config
   ;; `subword-mode' is great for CamelCase.
-  (add-hook 'go-mode-hook #'subword-mode)
+  (add-hook 'go-ts-mode-hook #'subword-mode)
   ;; I want LSP.
-  (add-hook 'go-mode-hook #'eglot-ensure)
-  ;; Use goimports to format the file. It also fixes up imports.
-  (setq gofmt-command "goimports")
-  (add-hook 'before-save-hook #'codesuki--organize-imports-and-format))
+  (add-hook 'go-ts-mode-hook #'eglot-ensure)
+  (add-hook 'go-ts-mode-hook #'codesuki--configure-gopls-env)
+  ;; Format before saving
+  (add-hook 'go-ts-mode-hook #'(lambda () (add-hook 'before-save-hook #'codesuki--organize-imports-and-format -10 t))))
 
-;; Provides useful things like jump to definition, list callers, etc. I wonder
-;; when this will be superseeded by LSP.
-(use-package go-guru)
+;; (use-package go-mode
+;;   :defer t
+;;   :config
+;;   ;; `subword-mode' is great for CamelCase.
+;;   (add-hook 'go-mode-hook #'subword-mode)
+;;   ;; I want LSP.
+;;   (add-hook 'go-mode-hook #'eglot-ensure)
+;;   ;; Use goimports to format the file. It also fixes up imports.
+;;   (setq gofmt-command "goimports")
+;;   (add-hook 'go-mode-hook #'(lambda () (add-hook 'before-save-hook #'codesuki--organize-imports-and-format nil t)))
+;;   (add-hook 'go-mode-hook #'codesuki--configure-gopls-env))
 
-;; Rarely using this. Adds tags to structs.
-(use-package go-tag
-  :defer t
-  :config
-  (with-eval-after-load 'go-mode
-    (define-key go-mode-map (kbd "C-c t") #'go-add-tags)))
+;; ;; Provides useful things like jump to definition, list callers, etc. I wonder
+;; ;; when this will be superseeded by LSP.
+;; (use-package go-guru)
+
+;; ;; Rarely using this. Adds tags to structs.
+;; (use-package go-tag
+;;   :defer t
+;;   :config
+;;   (with-eval-after-load 'go-mode
+;;     (define-key go-mode-map (kbd "C-c t") #'go-add-tags)))
 
 ;; Bazel support.
 (use-package emacs-bazel-mode
