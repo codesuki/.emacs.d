@@ -271,7 +271,7 @@
 (global-unset-key  [?\C-\s- ])
 
 ;; I prefer variable pitch fonts.
-(set-face-attribute 'default nil :font "Input Mono Condensed-14" :weight 'medium)
+(set-face-attribute 'default nil :font "Input Sans Compressed-14" :weight 'medium)
 (set-face-attribute 'fixed-pitch nil :font "Input Mono Condensed-14" :weight 'medium)
 (set-face-attribute 'variable-pitch nil :font "Input Sans Compressed-14" :weight 'medium)
 (add-hook 'text-mode-hook #'variable-pitch-mode)
