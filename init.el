@@ -55,7 +55,7 @@
   (unless (file-exists-p bootstrap-file)
     (with-current-buffer
 	(url-retrieve-synchronously
-	 "https://raw.githubusercontent.com/radian-software/straight.el/99ba608ed85e8814d89f00e09f3d99d76ee4f3d3/install.el"
+	 "https://raw.githubusercontent.com/radian-software/straight.el/039e5c9a9b5c00749602afb41341e9e77ba09429/install.el"
 	 'silent 'inhibit-cookies)
       (goto-char (point-max))
       (eval-print-last-sexp)))
