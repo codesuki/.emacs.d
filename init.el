@@ -1372,8 +1372,9 @@ returns non-nil. If all hooks return nil it executes
   :defer t
   :straight  '(bazel :type git :host github :repo "bazelbuild/emacs-bazel-mode")
   :commands bazel-mode
-  :config
-  (setq bazel-buildifier-before-save t))
+  :custom
+  (bazel-buildifier-before-save t "Run buildifier before saving."))
+
 
 ;; Dockerfile support.
 (use-package dockerfile-mode
