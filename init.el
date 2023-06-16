@@ -1394,8 +1394,8 @@ returns non-nil. If all hooks return nil it executes
 (use-package yaml-mode
   :defer t)
 
-(use-package json-mode
-  :defer t)
+;; (use-package json-mode
+;;   :defer t)
 
 (use-package jsonnet-mode
   :defer t
@@ -1422,20 +1422,20 @@ returns non-nil. If all hooks return nil it executes
   :config
   (setq js-indent-level 2))
 
-(defun set-jsx-indentation ()
-  (setq-local sgml-basic-offset js2-basic-offset))
+;; (defun set-jsx-indentation ()
+;;   (setq-local sgml-basic-offset js2-basic-offset))
 
-;; This mode was a bit better than `js-mode', but I am not sure this is still
-;; correct.
-(use-package js2-mode
-  :defer t
-  :config
-  (progn
-    (add-to-list 'auto-mode-alist '("\\.js\\'" . js2-mode))
-    (add-to-list 'auto-mode-alist '("\\.jsx\\'" . js2-jsx-mode))
-    (add-hook 'js2-jsx-mode-hook #'set-jsx-indentation)
-    (setq js2-mode-show-strict-warnings nil)
-    (setq js2-mode-show-parse-errors nil)))
+;; ;; This mode was a bit better than `js-mode', but I am not sure this is still
+;; ;; correct.
+;; (use-package js2-mode
+;;   :defer t
+;;   :config
+;;   (progn
+;;     (add-to-list 'auto-mode-alist '("\\.js\\'" . js2-mode))
+;;     (add-to-list 'auto-mode-alist '("\\.jsx\\'" . js2-jsx-mode))
+;;     (add-hook 'js2-jsx-mode-hook #'set-jsx-indentation)
+;;     (setq js2-mode-show-strict-warnings nil)
+;;     (setq js2-mode-show-parse-errors nil)))
 
 ;; Allows to use HTML, CSS, JS in the same file.
 ;; (use-package web-mode
@@ -1453,25 +1453,29 @@ returns non-nil. If all hooks return nil it executes
   (eval-after-load 'web-mode
     '(add-hook 'web-mode-hook #'add-node-modules-path))
   (eval-after-load 'typescript-mode
+    '(add-hook 'typescript-mode-hook #'add-node-modules-path))
+  (eval-after-load 'typescript-ts-mode
+    '(add-hook 'typescript-mode-hook #'add-node-modules-path))
+  (eval-after-load 'tsx-ts-mode
     '(add-hook 'typescript-mode-hook #'add-node-modules-path)))
 
 ;; Typescript support.
-(use-package typescript-mode
-  :init
-  ;; This is to support `tree-sitter'. Why do I want `tree-sitter'? Because
-  ;; `typescript-mode' cannot properly highlight TSX.
-  (define-derived-mode typescript-tsx-mode typescript-mode "tsx")
-  :config
-  (setq typescript-indent-level 2)
-  (add-hook 'typescript-mode-hook #'subword-mode)
-  (add-hook 'typescript-mode-hook #'eglot-ensure)
-  (add-to-list 'auto-mode-alist '("\\.tsx?\\'" . typescript-tsx-mode)))
+;; (use-package typescript-mode
+;;   :init
+;;   ;; This is to support `tree-sitter'. Why do I want `tree-sitter'? Because
+;;   ;; `typescript-mode' cannot properly highlight TSX.
+;;   (define-derived-mode typescript-tsx-mode typescript-mode "tsx")
+;;   :config
+;;   (setq typescript-indent-level 2)
+;;   (add-hook 'typescript-mode-hook #'subword-mode)
+;;   (add-hook 'typescript-mode-hook #'eglot-ensure)
+;;   (add-to-list 'auto-mode-alist '("\\.tsx?\\'" . typescript-tsx-mode)))
 
-;; This adds indent support to typescript/css/json via tree sitter.
-(use-package tsi
-  :straight '(tsi :type git :host github :repo "orzechowskid/tsi.el")
-  :init
-  (add-hook 'typescript-mode-hook #'tsi-typescript-mode))
+;; ;; This adds indent support to typescript/css/json via tree sitter.
+;; (use-package tsi
+;;   :straight '(tsi :type git :host github :repo "orzechowskid/tsi.el")
+;;   :init
+;;   (add-hook 'typescript-mode-hook #'tsi-typescript-mode))
 
 ;; I want to replace `expand-region' with this.
 ;; source: https://github.com/emacs-tree-sitter/elisp-tree-sitter/issues/20
@@ -1499,21 +1503,30 @@ returns non-nil. If all hooks return nil it executes
 
 ;; Provides an AST for languages. Mainly used for better syntax highlighting,
 ;; but has promise for more.
-(use-package tree-sitter
-  :init
-  (global-tree-sitter-mode)
-  (add-hook 'tree-sitter-after-on-hook #'tree-sitter-hl-mode))
+;; (use-package tree-sitter
+;;   :init
+;;   (global-tree-sitter-mode)
+;;   (add-hook 'tree-sitter-after-on-hook #'tree-sitter-hl-mode))
 
-(use-package tree-sitter-langs
-  :after tree-sitter
+;; (use-package tree-sitter-langs
+;;   :after tree-sitter
+;;   :config
+;;   (tree-sitter-require 'tsx)
+;;   (add-to-list 'tree-sitter-major-mode-language-alist '(typescript-tsx-mode . tsx)))
+
+(use-package typescript-ts-mode
   :config
-  (tree-sitter-require 'tsx)
-  (add-to-list 'tree-sitter-major-mode-language-alist '(typescript-tsx-mode . tsx)))
+  (add-hook 'typescript-ts-mode-hook #'eglot-ensure)
+  (add-hook 'tsx-ts-mode-hook #'eglot-ensure)
+  (with-eval-after-load 'eglot
+    (add-to-list 'eglot-server-programs
+		 '((tsx-ts-mode typescript-ts-mode) . ("typescript-language-server" "--stdio")))))
+
 
 ;; The popular JS formatting thing.
 (use-package prettier
   :defer t
-  :hook ((typescript-mode . prettier-mode)
+  :hook ((typescript-ts-mode . prettier-mode)
 	 (web-mode . prettier-mode)))
 
 ;; This is a mode to quickly write HTML. I forgot how it works, but I like it.
