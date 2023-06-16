@@ -722,6 +722,17 @@ returns non-nil. If all hooks return nil it executes
 						  :diagnostic.staticcheck t
 						  ))))
 
+(defun codesuki--isearch-exit-other-end (&optional nopush edit)
+	  "Exit current search on the other end of the match."
+	  (interactive)
+	  (funcall #'isearch-done nopush edit)
+	  (when isearch-other-end (goto-char isearch-other-end)))
+
+(use-package isearch
+  :straight (:type built-in)
+  :bind (:map isearch-mode-map
+	      ("C-<return>" . codesuki--isearch-exit-other-end)))
+
 ;; Nicer display of function/macro/variable description. Actually shows the code
 ;; and callers.
 (use-package helpful
