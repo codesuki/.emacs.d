@@ -733,6 +733,12 @@ returns non-nil. If all hooks return nil it executes
   :bind (:map isearch-mode-map
 	      ("C-<return>" . codesuki--isearch-exit-other-end)))
 
+;; Depends on https://github.com/casouri/tree-sitter-module
+(use-package treesit
+  :straight (:type built-in)
+  :config
+  (setq treesit-extra-load-path '("~/Development/tree-sitter-module/dist")))
+
 ;; Nicer display of function/macro/variable description. Actually shows the code
 ;; and callers.
 (use-package helpful
