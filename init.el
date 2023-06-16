@@ -676,6 +676,10 @@ returns non-nil. If all hooks return nil it executes
 ;; Shows linter errors in the fringe.
 (use-package flymake
   :config
+  ;; This removes the mouse overlay.
+  (put 'eglot-note 'flymake-overlay-control nil)
+  (put 'eglot-warning 'flymake-overlay-control nil)
+  (put 'eglot-error 'flymake-overlay-control nil)
   ;; This fixes some error message on startup.
   (remove-hook 'flymake-diagnostic-functions 'flymake-proc-legacy-flymake)
   (define-key flymake-mode-map (kbd "M-n") 'flymake-goto-next-error)
@@ -701,12 +705,22 @@ returns non-nil. If all hooks return nil it executes
 ;; The built-in or soon-to-be built-in LSP client. Simple and good.
 (use-package eglot
   :defer t
+  :init
   :config
   (set-face-attribute 'eglot-highlight-symbol-face nil :inherit 'error)
-  ;;(setq eglot-events-buffer-size 0)
+  (setq eglot-events-buffer-size 0)
   (define-key eglot-mode-map (kbd "C-c r") 'eglot-rename)
   (define-key eglot-mode-map (kbd "C-c o") 'eglot-code-actions)
-  (define-key eglot-mode-map (kbd "C-c h") 'eldoc))
+  (define-key eglot-mode-map (kbd "C-c h") 'eldoc)
+  (define-key eglot-mode-map (kbd "C-c i") 'eglot-find-implementation)
+  (setq-default eglot-workspace-configuration
+		'(:gopls (
+			  :build.directoryFilters ["-bazel-bin" "-bazel-out" "-bazel-testlogs" "-bazel-mercari-feature-flags"]
+						  :formatting.gofumpt t
+						  :completion.usePlaceholders t
+						  :diagnostic.vulncheck "Imports"
+						  :diagnostic.staticcheck t
+						  ))))
 
 ;; Nicer display of function/macro/variable description. Actually shows the code
 ;; and callers.
