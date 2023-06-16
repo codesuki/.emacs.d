@@ -107,6 +107,9 @@
 ;; I prefer y/n over yes/no.
 (setq use-short-answers t)
 
+;; Use coreutils ls because it supports --dired
+(setq insert-directory-program "gls")
+
 ;; TODO: move this
 (setq backup-directory-alist '(("." . "~/.emacs.d/.local/backups")))
 
