@@ -1181,6 +1181,14 @@ returns non-nil. If all hooks return nil it executes
   (global-set-key [remap query-replace-regexp] 'anzu-query-replace-regexp)
   (global-anzu-mode))
 
+(use-package nerd-icons
+  ;; :custom
+  ;; The Nerd Font you want to use in GUI
+  ;; "Symbols Nerd Font Mono" is the default and is recommended
+  ;; but you can use any other Nerd Font if you want
+  ;; (nerd-icons-font-family "Symbols Nerd Font Mono")
+  )
+
 ;; The best theme pack.
 (use-package doom-themes
   :config
@@ -1197,7 +1205,7 @@ returns non-nil. If all hooks return nil it executes
 (use-package doom-modeline
   :config
   (setq inhibit-compacting-font-caches t)
-  (setq all-the-icons-scale-factor 1.0)
+  (setq nerd-icons-scale-factor 1.0)
   (setq doom-modeline-bar-width 4)
   (setq doom-modeline-buffer-file-name-style 'truncate-with-project)
   (setq doom-modeline-buffer-encoding 'nondefault)
