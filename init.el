@@ -1271,8 +1271,46 @@ returns non-nil. If all hooks return nil it executes
   (doom-modeline-mode))
 
 ;; The fringe bitmaps from Doom Emacs.
-(define-fringe-bitmap 'codesuki--vc-fringe-bmp-insert [#b11100000] nil nil '(center repeated))
-(define-fringe-bitmap 'codesuki--vc-fringe-bmp-change [#b11100000] nil nil '(center repeated))
+;; Height should be computed like here:
+;; https://github.com/doomemacs/doomemacs/commit/78304f4d798dfe52b953a72d863fc0c904d695ec#diff-6127c853ccb0ae87cb04fe15fb4cdb07e2a58894a5bd0fffc5058197fde88f57R30
+(define-fringe-bitmap 'codesuki--vc-fringe-bmp-insert
+  [#b11100000
+   #b11100000
+   #b11100000
+   #b11100000
+   #b11100000
+   #b11100000
+   #b11100000
+   #b11100000
+   #b11100000
+   #b11100000
+   #b11100000
+   #b11100000
+   #b11100000
+   #b11100000
+   #b11100000
+   #b11100000
+   #b11100000
+   #b11100000] nil nil 'center)
+(define-fringe-bitmap 'codesuki--vc-fringe-bmp-change
+  [#b11100000
+   #b11100000
+   #b11100000
+   #b11100000
+   #b11100000
+   #b11100000
+   #b11100000
+   #b11100000
+   #b11100000
+   #b11100000
+   #b11100000
+   #b11100000
+   #b11100000
+   #b11100000
+   #b11100000
+   #b11100000
+   #b11100000
+   #b11100000] nil nil 'center)
 (define-fringe-bitmap 'codesuki--vc-fringe-bmp-delete
   [#b10000000
    #b11000000
@@ -1285,9 +1323,10 @@ returns non-nil. If all hooks return nil it executes
 ;; Shows git status in the fringe.
 (use-package diff-hl
   :config
-  (set-face-attribute 'diff-hl-insert nil :background nil)
-  (set-face-attribute 'diff-hl-delete nil :background nil)
-  (set-face-attribute 'diff-hl-change nil :background nil)
+  (setq vc-git-diff-switches '("--histogram"))
+  (set-face-attribute 'diff-hl-insert nil :background 'unspecified)
+  (set-face-attribute 'diff-hl-delete nil :background 'unspecified)
+  (set-face-attribute 'diff-hl-change nil :background 'unspecified)
   (setq-default fringes-outside-margins t)
   (setq diff-hl-fringe-bmp-function 'codesuki--fringe-bmp-from-type)
   (global-diff-hl-mode))
