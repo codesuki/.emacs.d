@@ -278,6 +278,11 @@
 (add-hook 'prog-mode-hook #'variable-pitch-mode)
 (add-hook 'protobuf-mode-hook #'variable-pitch-mode)
 
+;; I don't like the borders when I hover over the modeline. It cuts off the
+;; text.
+(set-face-attribute 'mode-line nil :box nil)
+(set-face-attribute 'mode-line-inactive nil :box nil)
+
 ;; From doom emacs. The native window divider takes a pixel out of the fringe.
 (setq window-divider-default-places t)
 (setq window-divider-default-bottom-width 1)
