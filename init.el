@@ -721,27 +721,30 @@ returns non-nil. If all hooks return nil it executes
 (use-package dabbrev
   ;; Swap M-/ and C-M-/
   :bind (("M-/" . dabbrev-completion)
-	 ("C-M-/" . dabbrev-expand)))
+	 ("C-M-/" . dabbrev-expand))
+  :config
+  (setq dabbrev-case-replace nil))
 
 ;; The built-in or soon-to-be built-in LSP client. Simple and good.
 (use-package eglot
+  :after project
   :defer t
   :init
   :config
   (set-face-attribute 'eglot-highlight-symbol-face nil :inherit 'error)
-  (setq eglot-events-buffer-size 0)
+  (fset #'jsonrpc--log-event #'ignore)
+  (setf (plist-get eglot-events-buffer-config :size) 0)
   (define-key eglot-mode-map (kbd "C-c r") 'eglot-rename)
   (define-key eglot-mode-map (kbd "C-c o") 'eglot-code-actions)
   (define-key eglot-mode-map (kbd "C-c h") 'eldoc)
   (define-key eglot-mode-map (kbd "C-c i") 'eglot-find-implementation)
   (setq-default eglot-workspace-configuration
 		'(:gopls (
-			  :build.directoryFilters ["-bazel-bin" "-bazel-out" "-bazel-testlogs" "-bazel-mercari-feature-flags"]
-						  :formatting.gofumpt t
-						  :completion.usePlaceholders t
-						  :diagnostic.vulncheck "Imports"
-						  :diagnostic.staticcheck t
-						  ))))
+			  :formatting.gofumpt t
+			  :completion.usePlaceholders t
+			  :diagnostic.vulncheck "Imports"
+			  :diagnostic.staticcheck t
+			  :build.directoryFilters ["-bazel-bin" "-bazel-out" "-bazel-testlogs" "-bazel-mercari-feature-flags"]))))
 
 (defun codesuki--isearch-exit-other-end (&optional nopush edit)
 	  "Exit current search on the other end of the match."
