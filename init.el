@@ -1510,7 +1510,7 @@ returns non-nil. If all hooks return nil it executes
 
 ;; Many projects use this. So I am keeping it.
 (use-package google-c-style
-  :straight (google-c-style :branch "master")
+  :straight (google-c-style :branch "gh-pages")
   :defer t
   :config
   (progn
@@ -1518,6 +1518,12 @@ returns non-nil. If all hooks return nil it executes
     (add-hook 'c-mode-hook 'google-make-newline-indent)
     (add-hook 'c++-mode-hook 'google-set-c-style)
     (add-hook 'c++-mode-hook 'google-make-newline-indent)))
+
+(use-package clang-format
+  :custom
+  (clang-format-fallback-style "chromium")
+  :config
+  (add-hook 'c-ts-mode-hook #'(lambda () (add-hook 'before-save-hook #'clang-format-buffer -10 t))))
 
 ;; JS support is built-in.
 (use-package js
@@ -1655,6 +1661,8 @@ returns non-nil. If all hooks return nil it executes
 ;; Swift support.
 (use-package swift-mode
   :defer t)
+
+(use-package dart-mode)
 
 ;; For the nand2tetris course.
 (use-package nand2tetris
