@@ -547,8 +547,17 @@ returns non-nil. If all hooks return nil it executes
 			      (codesuki--display-buffer-in-side-window)
 			      (window-parameters (mode-line-format . none)))))
 
+;; The default project package of emacs has enough features for me.
+;; Commands are bound to `C-x p'.
+(use-package project
+  :demand t)
+
 ;; When using use-package with built-in packages it will pull newer version from
 ;; elpa.
+;; Supports code folding:
+;; 'outline-minor-mode' is supported in Xref buffers.
+;; You can enable outlining by adding 'outline-minor-mode' to
+;;'xref-after-update-hook'.
 (use-package xref
   :config
   ;; The choice is between grep and ripgrep. I prefer the latter.
@@ -559,10 +568,6 @@ returns non-nil. If all hooks return nil it executes
   :config
   ;; I want docs.
   (add-hook 'emacs-lisp-mode-hook 'eldoc-mode))
-
-;; The default project package of emacs has enough features for me.
-;; Commands are bound to `C-x p'.
-(use-package project)
 
 ;;(require 'ansi-color)
 (defun colorize-compilation-buffer ()
@@ -658,6 +663,12 @@ returns non-nil. If all hooks return nil it executes
 (use-package winner
   :config
   (winner-mode))
+
+(use-package epa-file
+  :straight (:type built-in)
+  :config
+  (epa-file-enable)
+  (setq epa-file-select-keys nil))
 
 ;; Otherwise those PATH variables are not available in GUI Emacs.
 (use-package exec-path-from-shell
