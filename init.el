@@ -527,6 +527,9 @@ returns non-nil. If all hooks return nil it executes
 			     ("\\*info\\*"
 			      (codesuki--display-buffer-in-side-window)
 			      (side . right))
+			     ("\\*compilation\\*"
+			      (codesuki--display-buffer-in-side-window)
+			      (side . right))
 			      ;; this one does not close on C-g. This was because the debugger was on.
 			     ;; ("\\*Backtrace\\*"
 			     ;;  (codesuki--display-buffer-in-side-window))
