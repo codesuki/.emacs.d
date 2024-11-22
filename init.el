@@ -999,11 +999,11 @@ returns non-nil. If all hooks return nil it executes
 	deft-extensions '("org")))
 
 ;; This optimizes the garbage collector.
-(use-package gcmh
-  :config
-  (setq gcmh-idle-delay 'auto)
-  (setq gcmh-auto-idle-delay-factor 10)
-  (gcmh-mode))
+;; (use-package gcmh
+;;   :config
+;;   (setq gcmh-idle-delay 'auto)
+;;   (setq gcmh-auto-idle-delay-factor 10)
+;;   (gcmh-mode))
 
 ;; A create fuzzy search package.
 (use-package orderless
