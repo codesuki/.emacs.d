@@ -788,12 +788,14 @@ returns non-nil. If all hooks return nil it executes
 		  org-checkbox
 		  ))
     (let ((current (face-attribute face :inherit)))
+      ;; earlier faces override later faces if inherit is a list.
       (set-face-attribute face nil :inherit (delete-dups
 					     (append
+					      '(fixed-pitch)
 					      (if (listp current)
 						  current
 						(list current))
-					      '(fixed-pitch)))))))
+					      ))))))
 
 ;; For my org-agenda.
 (use-package japanese-holidays
@@ -844,8 +846,9 @@ returns non-nil. If all hooks return nil it executes
 (use-package org
   :config
   ;; In `org-mode' I prefer longer lines.
-  (add-hook 'org-mode-hook (lambda () (setq fill-column 120)))
+  (add-hook 'org-mode-hook (lambda () (setq fill-column 100)))
   (add-hook 'org-indent-mode-hook (lambda () (setup-org-faces)))
+  (add-hook 'org-agenda-mode-hook (lambda () (buffer-face-set 'fixed-pitch)))
   ;; `org-indent-mode' hides the stars on the left side which is quite noisy
   ;; with many indent levels.
   (setq org-startup-indented t)
