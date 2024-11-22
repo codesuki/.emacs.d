@@ -541,6 +541,8 @@ returns non-nil. If all hooks return nil it executes
 			      (codesuki--display-buffer-in-side-window))
 			     ("\\*prettier errors\\*"
 			      (codesuki--display-buffer-in-side-window))
+			     ("\\*Flymake diagnostics .*\\*"
+			      (codesuki--display-buffer-in-side-window))
 			     ("\\*vterm\\*"
 			      (codesuki--display-buffer-in-side-window)
 			      (window-parameters (mode-line-format . none)))))
