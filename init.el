@@ -1420,6 +1420,14 @@ returns non-nil. If all hooks return nil it executes
   (keyfreq-mode 1)
   (keyfreq-autosave-mode 1))
 
+
+
+;; Bazel support.
+(use-package bazel
+  :straight  '(bazel :type git :host github :repo "bazelbuild/emacs-bazel-mode")
+  :custom
+  (bazel-buildifier-before-save t "Run buildifier before saving."))
+
 (defun codesuki--organize-imports-and-format ()
   ;; check if organize imports is available. or just ignore error.
   (condition-case nil
@@ -1428,12 +1436,16 @@ returns non-nil. If all hooks return nil it executes
   (eglot-format-buffer))
 
 (defun codesuki--configure-gopls-env ()
-  (make-local-variable 'process-environment)
-  (add-to-list 'process-environment "GOPACKAGESDRIVER=./tools/gopackagesdriver.sh")
-  )
+  ;(when (boundp 'project-current)
+    (when (bazel--workspace-root-p (project-root (project-current)))
+      (message "Running in a Bazel workspace. Setting GOPACKAGESDRIVER.")
+      (make-local-variable 'process-environment)
+      (add-to-list 'process-environment "GOPACKAGESDRIVER=./tools/gopackagesdriver.sh")))
+;)
 
 ;; Go support.
 (use-package go-ts-mode
+  :after bazel
   :config
   ;; `subword-mode' is great for CamelCase.
   (add-hook 'go-ts-mode-hook #'subword-mode)
@@ -1465,14 +1477,6 @@ returns non-nil. If all hooks return nil it executes
 ;;   :config
 ;;   (with-eval-after-load 'go-mode
 ;;     (define-key go-mode-map (kbd "C-c t") #'go-add-tags)))
-
-;; Bazel support.
-(use-package emacs-bazel-mode
-  :defer t
-  :straight  '(bazel :type git :host github :repo "bazelbuild/emacs-bazel-mode")
-  :commands bazel-mode
-  :custom
-  (bazel-buildifier-before-save t "Run buildifier before saving."))
 
 
 ;; Dockerfile support.
