@@ -51,11 +51,11 @@
 (defvar bootstrap-version)
 (let ((bootstrap-file
        (expand-file-name ".local/straight/repos/straight.el/bootstrap.el" user-emacs-directory))
-      (bootstrap-version 5))
+      (bootstrap-version 7))
   (unless (file-exists-p bootstrap-file)
     (with-current-buffer
 	(url-retrieve-synchronously
-	 "https://raw.githubusercontent.com/radian-software/straight.el/039e5c9a9b5c00749602afb41341e9e77ba09429/install.el"
+	 "https://github.com/radian-software/straight.el/raw/b1062df10ba4c10ff7a3c61b9e124b3242b11bb2/install.el"
 	 'silent 'inhibit-cookies)
       (goto-char (point-max))
       (eval-print-last-sexp)))
