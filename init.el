@@ -1011,16 +1011,21 @@ returns non-nil. If all hooks return nil it executes
   (setq completion-styles '(orderless)))
 
 (defun corfu-enable-in-minibuffer ()
-  "Enable Corfu in the minibuffer if `completion-at-point' is bound."
-  (when (where-is-internal #'completion-at-point (list (current-local-map)))
-    ;; (setq-local corfu-auto nil) Enable/disable auto completion
+  "Enable Corfu in the minibuffer."
+  (when (local-variable-p 'completion-at-point-functions)
+    ;; (setq-local corfu-auto nil) ;; Enable/disable auto completion
+    (setq-local corfu-echo-delay nil ;; Disable automatic echo and popup
+		corfu-popupinfo-delay nil)
     (corfu-mode 1)))
 
 ;; Shows completion candidates in a small popup.
 (use-package corfu
+  ;; :straight (:files (:defaults "extensions/*"))
+  :custom
+  (corfu-preselect 'first)
   :init
-  (setq corfu-preselect-first nil)
   (global-corfu-mode)
+;;  (corfu-popinfo-mode)
   (add-hook 'minibuffer-setup-hook #'corfu-enable-in-minibuffer))
 
 ;; Minibuffer completion using `completion-at-point'. Simple and good.
