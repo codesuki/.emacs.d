@@ -1397,7 +1397,9 @@ returns non-nil. If all hooks return nil it executes
 
 ;; Very nice Git UI although I mainly use the commandline.
 (use-package magit
-  :defer t)
+  :defer t
+  :config
+  (setq magit-display-buffer-function #'magit-display-buffer-fullcolumn-most-v1))
 
 (use-package forge
   :after magit)
