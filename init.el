@@ -82,7 +82,7 @@
 
 ;; I want to see trailing whitespace, but only when programming. Enabling this
 ;; everywhere is very noisy in `eww', `org-mode', etc.
-  (add-hook 'prog-mode-hook (lambda () (setq show-trailing-whitespace t)))
+(add-hook 'prog-mode-hook (lambda () (setq show-trailing-whitespace t)))
 ;; (setq-default indent-tabs-mode nil)
 
 ;; This adds a marker on the fringe for empty lines at the end of the file.
@@ -208,8 +208,8 @@
 (keymap-global-set "M-z" 'zap-up-to-char)
 
 ;; i want `C-h' to behave like in the terminal.
-(keymap-global-set "C-?" 'help-command)
-(keymap-global-set "C-h" 'delete-backward-char)
+;; (keymap-global-set "C-?" 'help-command)
+;;(keymap-global-set "C-h" 'delete-backward-char)
 
 ;; Use dwim case functions.
 (keymap-global-set "M-u" 'upcase-dwim)
@@ -218,6 +218,13 @@
 
 ;; This frees M-\ because `cycle-spacing' does both.
 (keymap-global-set "M-SPC" 'cycle-spacing)
+
+;; Trying to use ESC on it's actual location on the kinesis 360
+(global-unset-key (kbd "M-ESC ESC"))
+
+;; Rotating windows to the middle seems nice. Maybe just swapping would be
+;; enough.
+(keymap-global-set "C-o" 'rotate-windows)
 
 ;; Keeps `init.el' clean.
 (setq custom-file (locate-user-emacs-file "custom.el"))
@@ -269,6 +276,10 @@
 (global-unset-key  [?\s-|])
 (global-unset-key  [s-kp-bar])
 (global-unset-key  [?\C-\s- ])
+
+;; Restore bindings redefined in `ns-win.el'
+(define-key global-map [home] 'move-beginning-of-line-or-indent)
+(define-key global-map [end] 'move-end-of-line)
 
 ;; I prefer variable pitch fonts.
 (set-face-attribute 'default nil :font "Input Sans Compressed-14" :weight 'medium)
@@ -536,9 +547,15 @@ returns non-nil. If all hooks return nil it executes
 			     ("\\*eldoc\\*"
 			      (codesuki--display-buffer-in-side-window))
 			     ("\\*Compile-Log\\*"
-			      (codesuki--display-buffer-in-side-window))
+			      (display-buffer-no-window)
+			      (allow-no-window . t)
+			      ;; (codesuki--display-buffer-in-side-window)
+			      )
 			     ("\\*Warnings\\*"
-			      (codesuki--display-buffer-in-side-window))
+			      (display-buffer-no-window)
+			      (allow-no-window . t)
+			      ;; (codesuki--display-buffer-in-side-window)
+			      )
 			     ("\\*prettier errors\\*"
 			      (codesuki--display-buffer-in-side-window))
 			     ("\\*Flymake diagnostics .*\\*"
@@ -649,6 +666,7 @@ returns non-nil. If all hooks return nil it executes
 ;; Make recently used files available when switching buffers.
 (use-package recentf
   :config
+  (setq recentf-max-saved-items 100)
   (recentf-mode))
 
 ;; This cleans up trailing whitespace before saving.
@@ -959,6 +977,10 @@ returns non-nil. If all hooks return nil it executes
 	   :if-new
 	   (file+head "reference/${slug}.org" "#+title: ${title}\n")
 	   :immediate-finish t
+	   :unnarrowed t)
+	  ("w" "work" plain "%?"
+	   :if-new (file+head "work/${slug}.org" "#+title: ${title}\n")
+	   :immediate-finish t
 	   :unnarrowed t)))
 
   (cl-defmethod org-roam-node-type ((node org-roam-node))
@@ -982,21 +1004,23 @@ returns non-nil. If all hooks return nil it executes
   (pop-to-buffer buffer '((display-buffer-below-selected) (dedicated 'elfeed) (window-height 100))))
 
 (use-package elfeed
+  :defer t
   :config
   (setq elfeed-show-entry-switch 'codesuki--elfeed-display-buffer)
   (setq elfeed-db-directory (to-local-path "elfeed")))
 
 ;; To be able to manage feeds via org-files.
 (use-package elfeed-org
+  :defer t
   :config
   (setq rmh-elfeed-org-files '("~/notes/feeds.org"))
   (elfeed-org))
 
-(use-package deft
-  :config
-  (setq deft-directory "~/notes"
-	deft-recursive t
-	deft-extensions '("org")))
+;; (use-package deft
+;;   :config
+;;   (setq deft-directory "~/notes"
+;;	deft-recursive t
+;;	deft-extensions '("org")))
 
 ;; This optimizes the garbage collector.
 ;; (use-package gcmh
@@ -1163,12 +1187,11 @@ returns non-nil. If all hooks return nil it executes
 ;;   (setq which-key-use-C-h-commands nil))
 
 ;; The best terminal support for Emacs.
-(use-package vterm)
+;; (use-package vterm)
 
 ;; `goto-last-change', quite useful.
 (use-package goto-chg
-  :config
-  (keymap-global-set "C-\\" 'goto-last-change))
+  :bind ("C-\\" . goto-last-change))
 
 ;; Eagerly deletes whitespace.
 (use-package hungry-delete
@@ -1338,52 +1361,11 @@ returns non-nil. If all hooks return nil it executes
 
 ;; Very useful when editing yaml.
 (use-package highlight-indent-guides
+  :hook (yaml-mode . highlight-indent-guides-mode)
   :config
-  (setq highlight-indent-guides-method 'column)
-  (add-hook 'yaml-mode-hook 'highlight-indent-guides-mode))
+  (setq highlight-indent-guides-method 'column))
 
-;; A directory tree view on the left side. Can also show other things. Actually
-;; I never use it.
-(use-package treemacs
-  :defer t
-  :init
-  (with-eval-after-load 'winum
-    (define-key winum-keymap (kbd "M-0") #'treemacs-select-window))
-  :config
-  ;; The default width and height of the icons is 22 pixels. If you are
-  ;; using a Hi-DPI display, uncomment this to double the icon size.
-  ;;(treemacs-resize-icons 44)
-  (treemacs-follow-mode t)
-  (treemacs-filewatch-mode t)
-  (treemacs-fringe-indicator-mode t)
-  (pcase (cons (not (null (executable-find "git")))
-	       (not (null (executable-find "python3"))))
-    (`(t . t)
-     (treemacs-git-mode 'deferred))
-    (`(t . _)
-     (treemacs-git-mode 'simple)))
-  :bind
-  (:map global-map
-	("M-0"       . treemacs-select-window)
-	("C-x t 1"   . treemacs-delete-other-windows)
-	("C-x t t"   . treemacs)
-	("C-x t B"   . treemacs-bookmark)
-	("C-x t C-t" . treemacs-find-file)
-	("C-x t M-t" . treemacs-find-tag)))
-
-(use-package treemacs-icons-dired
-  :after treemacs dired
-  :config (treemacs-icons-dired-mode))
-
-(use-package treemacs-magit
-  :after treemacs magit)
-
-;; Show old versions of a file.
-(use-package git-timemachine
-  :defer t)
-
-;; This has awesome functions for editing list but I've never used them.
-(use-package smartparens)
+;; This has awesome functions for editing list but I've never used them.(use-package smartparens)
 
 ;; Editorconfig. Not using it anymore.
 (use-package editorconfig
@@ -1427,8 +1409,6 @@ returns non-nil. If all hooks return nil it executes
   (keyfreq-mode 1)
   (keyfreq-autosave-mode 1))
 
-
-
 ;; Bazel support.
 (use-package bazel
   :straight  '(bazel :type git :host github :repo "bazelbuild/emacs-bazel-mode")
@@ -1443,12 +1423,11 @@ returns non-nil. If all hooks return nil it executes
   (eglot-format-buffer))
 
 (defun codesuki--configure-gopls-env ()
-  ;(when (boundp 'project-current)
+  (when (boundp 'project-current)
     (when (bazel--workspace-root-p (project-root (project-current)))
       (message "Running in a Bazel workspace. Setting GOPACKAGESDRIVER.")
       (make-local-variable 'process-environment)
-      (add-to-list 'process-environment "GOPACKAGESDRIVER=./tools/gopackagesdriver.sh")))
-;)
+      (add-to-list 'process-environment "GOPACKAGESDRIVER=./tools/gopackagesdriver.sh"))))
 
 ;; Go support.
 (use-package go-ts-mode
@@ -1492,9 +1471,7 @@ returns non-nil. If all hooks return nil it executes
 
 ;; Assembler support.
 (use-package nasm-mode
-  :defer t
-  :config
-  (add-to-list 'auto-mode-alist '("\\.s\\'" . nasm-mode)))
+  :mode "\\.s\\'")
 
 ;; Protobuf support.
 (use-package protobuf-mode
@@ -1515,22 +1492,38 @@ returns non-nil. If all hooks return nil it executes
 (use-package cue-mode
    :straight  '(cue-mode :type git :host github :repo "russell/cue-mode"))
 
-;; Many projects use this. So I am keeping it.
-(use-package google-c-style
-  :straight (google-c-style :branch "gh-pages")
-  :defer t
+(use-package c-ts-mode
+  :hook ((c-ts-mode . (lambda () (setq comment-start "//" comment-end "")))
+	 ;; clangd inserts // when pressing return inside a comment, but the cursor
+	 ;; ends up behind them which is annoying.
+	 (c-ts-mode . (lambda () (setq-local eglot-ignored-server-capabilities '(:documentOnTypeFormattingProvider))))
+	 (c-ts-mode . (lambda () (add-hook 'before-save-hook #'eglot-format -10 t))))
   :config
-  (progn
-    (add-hook 'c-mode-hook 'google-set-c-style)
-    (add-hook 'c-mode-hook 'google-make-newline-indent)
-    (add-hook 'c++-mode-hook 'google-set-c-style)
-    (add-hook 'c++-mode-hook 'google-make-newline-indent)))
+  (add-to-list 'major-mode-remap-alist '(c-mode . c-ts-mode))
+  (add-to-list 'major-mode-remap-alist '(c++-mode . c++-ts-mode))
+  (add-to-list 'major-mode-remap-alist '(c-or-c++-mode . c-or-c++-ts-mode)))
 
-(use-package clang-format
-  :custom
-  (clang-format-fallback-style "chromium")
-  :config
-  (add-hook 'c-ts-mode-hook #'(lambda () (add-hook 'before-save-hook #'clang-format-buffer -10 t))))
+;; Many projects use this. So I am keeping it.
+;; (use-package google-c-style
+;;   :straight (google-c-style :branch "gh-pages")
+;;   :defer t
+;;   :config
+;;   (progn
+;;     (add-hook 'c-mode-hook 'google-set-c-style)
+;;     (add-hook 'c-mode-hook 'google-make-newline-indent)
+;;     (add-hook 'c++-mode-hook 'google-set-c-style)
+;;     (add-hook 'c++-mode-hook 'google-make-newline-indent)
+;;     (add-hook 'c-mode-hook (lambda () (setq comment-start "//" comment-end "")))))
+
+;; (use-package clang-format
+;;   :custom
+;;   (clang-format-fallback-style "chromium")
+;;   :config
+;; ;;  (add-hook 'c-ts-mode-hook #'(lambda () (add-hook 'before-save-hook #'clang-format-buffer -10 t)))
+;;   )
+
+(use-package realgud)
+(use-package realgud-lldb)
 
 ;; JS support is built-in.
 (use-package js
@@ -1678,6 +1671,29 @@ returns non-nil. If all hooks return nil it executes
   :config
   (add-to-list 'auto-mode-alist '("\\.hdl\\'" . nand2tetris-mode))
   (setq nand2tetris-core-base-dir "~/Development/nand2tetris"))
+
+(use-package gptel
+  :config
+  (setq
+   gptel-model 'deepseek-r1:latest
+   gptel-backend
+   (gptel-make-ollama "Ollama"
+     :host "localhost:11434"
+     :stream t
+     :models '(deepseek-r1:latest))))
+
+(use-package eat
+  :straight (eat
+	     :type git
+	     :host codeberg
+	     :repo "akib/emacs-eat"
+	     :files ("*.el" ("term" "term/*.el") "*.texi"
+		     "*.ti" ("terminfo/e" "terminfo/e/*")
+		     ("terminfo/65" "terminfo/65/*")
+		     ("integration" "integration/*")
+		     (:exclude ".dir-locals.el" "*-tests.el"))))
+
+(use-package keycast)
 
 (load custom-file 'noerror 'nomessage)
 
