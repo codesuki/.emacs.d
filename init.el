@@ -1329,6 +1329,7 @@ returns non-nil. If all hooks return nil it executes
   (setq inhibit-compacting-font-caches t)
   (setq nerd-icons-scale-factor 1.0)
   (setq doom-modeline-bar-width 4)
+  (setq doom-modeline-height 35)
   (setq doom-modeline-buffer-file-name-style 'truncate-with-project)
   (setq doom-modeline-buffer-encoding 'nondefault)
   (setq doom-modeline-major-mode-color-icon t)
