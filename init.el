@@ -734,6 +734,7 @@ returns non-nil. If all hooks return nil it executes
   (put 'eglot-error 'flymake-overlay-control nil)
   ;; This fixes some error message on startup.
   (remove-hook 'flymake-diagnostic-functions 'flymake-proc-legacy-flymake)
+  (setq flymake-show-diagnostics-at-end-of-line 'fancy)
   (define-key flymake-mode-map (kbd "M-n") 'flymake-goto-next-error)
   (define-key flymake-mode-map (kbd "M-p") 'flymake-goto-prev-error)
   (flymake-mode))
