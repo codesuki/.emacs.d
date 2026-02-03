@@ -282,14 +282,20 @@
 (defun font-available-p (font-name)
   (find-font (font-spec :name font-name)))
 
-;; I prefer variable pitch fonts.
-(cond
- ((font-available-p "Input Sans Compressed")
-  (set-face-attribute 'default nil :font "Input Sans Compressed-14" :weight 'medium)
-  (set-face-attribute 'variable-pitch nil :font "Input Sans Compressed-14" :weight 'medium))
- ((font-available-p "Input Sans Mono")
-  (set-face-attribute 'fixed-pitch nil :font "Input Mono Condensed-14" :weight 'medium)))
+(defun codesuki-set-font-faces ()
+  "Set the default font for the current FRAME."
+  (cond
+   ((font-available-p "Input Sans Compressed")
+    (set-face-attribute 'variable-pitch nil :font "Input Sans Compressed-12" :weight 'medium))
+   ((font-available-p "Input Mono")
+    (set-face-attribute 'default nil :font "Input Mono Compressed-12" :weight 'medium)
+    (set-face-attribute 'fixed-pitch nil :font "Input Mono Condensed-12" :weight 'medium))))
 
+(if (daemonp)
+    (add-hook 'server-after-make-frame-hook #'codesuki-set-font-faces)
+  (codesuki-set-font-faces))
+
+;; I prefer variable pitch fonts.
 (add-hook 'text-mode-hook #'variable-pitch-mode)
 (add-hook 'prog-mode-hook #'variable-pitch-mode)
 (add-hook 'protobuf-mode-hook #'variable-pitch-mode)
