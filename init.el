@@ -281,10 +281,18 @@
 (define-key global-map [home] 'move-beginning-of-line-or-indent)
 (define-key global-map [end] 'move-end-of-line)
 
+;; Source: https://emacsredux.com/blog/2021/12/22/check-if-a-font-is-available-with-emacs-lisp/
+(defun font-available-p (font-name)
+  (find-font (font-spec :name font-name)))
+
 ;; I prefer variable pitch fonts.
-(set-face-attribute 'default nil :font "Input Sans Compressed-14" :weight 'medium)
-(set-face-attribute 'fixed-pitch nil :font "Input Mono Condensed-14" :weight 'medium)
-(set-face-attribute 'variable-pitch nil :font "Input Sans Compressed-14" :weight 'medium)
+(cond
+ ((font-available-p "Input Sans Compressed")
+  (set-face-attribute 'default nil :font "Input Sans Compressed-14" :weight 'medium)
+  (set-face-attribute 'variable-pitch nil :font "Input Sans Compressed-14" :weight 'medium))
+ ((font-available-p "Input Sans Mono")
+  (set-face-attribute 'fixed-pitch nil :font "Input Mono Condensed-14" :weight 'medium)))
+
 (add-hook 'text-mode-hook #'variable-pitch-mode)
 (add-hook 'prog-mode-hook #'variable-pitch-mode)
 (add-hook 'protobuf-mode-hook #'variable-pitch-mode)
