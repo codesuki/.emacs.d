@@ -125,9 +125,6 @@
 (setq eshell-directory-name "~/.emacs.d/.local/eshell")
 
 (setq async-byte-compile-log-file (to-local-path "async-bytecomp.log"))
-(setq desktop-dirname (to-local-path "desktop"))
-(setq desktop-base-file-name "autosave")
-(setq desktop-base-lock-name "autosave-lock")
 (setq pcache-directory (to-local-path "pcache/"))
 (setq shared-game-score-directory (to-local-path "shared-game-score/"))
 (setq amx-save-file (to-local-path "amx-save.el"))
@@ -699,8 +696,10 @@ returns non-nil. If all hooks return nil it executes
 ;; Otherwise those PATH variables are not available in GUI Emacs.
 (use-package exec-path-from-shell
   :config
+  (setq exec-path-from-shell-shell-name "/usr/local/bin/fish")
+  (setq exec-path-from-shell-arguments '("--login"))
   (setq exec-path-from-shell-variables '("GOPATH" "PATH" "MANPATH" "JAVA_HOME"))
-  (setq exec-path-from-shell-arguments nil)
+  (setq exec-path-from-shell-debug nil)
   (exec-path-from-shell-initialize))
 
 ;; I use hunspell because it supports multiple dictionaries.
@@ -787,6 +786,25 @@ returns non-nil. If all hooks return nil it executes
 (use-package treesit
   :straight (:type built-in)
   :config
+  (setq treesit-language-source-alist
+	'((bash "https://github.com/tree-sitter/tree-sitter-bash")
+	  (cmake "https://github.com/uyha/tree-sitter-cmake")
+	  (css "https://github.com/tree-sitter/tree-sitter-css")
+	  (elisp "https://github.com/Wilfred/tree-sitter-elisp")
+	  (c "https://github.com/tree-sitter/tree-sitter-c")
+	  (cpp "https://github.com/tree-sitter/tree-sitter-cpp")
+	  (go "https://github.com/tree-sitter/tree-sitter-go")
+	  (go-mod "https://github.com/camdencheek/tree-sitter-go-mod")
+	  (html "https://github.com/tree-sitter/tree-sitter-html")
+	  (javascript "https://github.com/tree-sitter/tree-sitter-javascript" "master" "src")
+	  (json "https://github.com/tree-sitter/tree-sitter-json")
+	  (make "https://github.com/alemuller/tree-sitter-make")
+	  (markdown "https://github.com/ikatyang/tree-sitter-markdown")
+	  (python "https://github.com/tree-sitter/tree-sitter-python")
+	  (toml "https://github.com/tree-sitter/tree-sitter-toml")
+	  (tsx "https://github.com/tree-sitter/tree-sitter-typescript" "master" "tsx/src")
+	  (typescript "https://github.com/tree-sitter/tree-sitter-typescript" "master" "typescript/src")
+	  (yaml "https://github.com/ikatyang/tree-sitter-yaml")))
   (setq treesit-extra-load-path '("~/Development/tree-sitter-module/dist")))
 
 ;; Nicer display of function/macro/variable description. Actually shows the code
@@ -1062,15 +1080,24 @@ returns non-nil. If all hooks return nil it executes
 
 ;; Minibuffer completion using `completion-at-point'. Simple and good.
 (use-package vertico
-  :straight (vertico :includes vertico-directory
-		     :files (:defaults "extensions/vertico-directory.el"))
+  :straight (vertico :includes (vertico-directory vertico-sort)
+		     :files (:defaults "extensions/vertico-*.el"))
+  :init
+  (vertico-mode))
+
+(use-package vertico-directory
+  :after vertico
+  :ensure nil
+  ;; More convenient directory navigation commands
   :bind (:map vertico-map
 	      ("RET" . vertico-directory-enter)
 	      ("DEL" . vertico-directory-delete-char)
 	      ("M-DEL" . vertico-directory-delete-word))
-  :hook (rfn-eshadow-update-overlay . vertico-directory-tidy)
-  :init
-  (vertico-mode))
+  ;; Tidy shadowed file names
+  :hook (rfn-eshadow-update-overlay . vertico-directory-tidy))
+
+(use-package vertico-sort
+  :after vertico)
 
 ;; Shows useful information for minibuffer entries. E.g. extra information for
 ;; buffers.
@@ -1389,6 +1416,7 @@ returns non-nil. If all hooks return nil it executes
 (use-package magit
   :defer t
   :config
+  (add-hook 'git-commit-mode-hook (lambda () (setq fill-column 72)))
   (setq magit-display-buffer-function #'magit-display-buffer-fullcolumn-most-v1))
 
 (use-package forge
@@ -1421,7 +1449,9 @@ returns non-nil. If all hooks return nil it executes
 (use-package bazel
   :straight  '(bazel :type git :host github :repo "bazelbuild/emacs-bazel-mode")
   :custom
-  (bazel-buildifier-before-save t "Run buildifier before saving."))
+  (bazel-buildifier-before-save t "Run buildifier before saving.")
+  :config
+  (add-to-list 'auto-mode-alist '("\\.star\\'" . bazel-starlark-mode)))
 
 (defun codesuki--organize-imports-and-format ()
   ;; check if organize imports is available. or just ignore error.
@@ -1509,7 +1539,12 @@ returns non-nil. If all hooks return nil it executes
   :config
   (add-to-list 'major-mode-remap-alist '(c-mode . c-ts-mode))
   (add-to-list 'major-mode-remap-alist '(c++-mode . c++-ts-mode))
-  (add-to-list 'major-mode-remap-alist '(c-or-c++-mode . c-or-c++-ts-mode)))
+  (add-to-list 'major-mode-remap-alist '(c-or-c++-mode . c-or-c++-ts-mode))
+  (with-eval-after-load 'eglot
+    (add-to-list 'eglot-server-programs
+		 '((c-ts-mode c++-ts-mode) . ("clangd"
+					      "--header-insertion=never"
+					      "--fallback-style=none")))))
 
 ;; Many projects use this. So I am keeping it.
 ;; (use-package google-c-style
@@ -1702,6 +1737,25 @@ returns non-nil. If all hooks return nil it executes
 		     (:exclude ".dir-locals.el" "*-tests.el"))))
 
 (use-package keycast)
+
+(use-package gn-mode
+  :straight  '(gn-mode :type git :host nil :repo "https://chromium.googlesource.com/chromium/src/tools" :branch "main" :files ("emacs/gn.el"))
+  :config
+  (add-to-list 'auto-mode-alist '("\\.gni?\\'" . gn-mode))
+
+  (with-eval-after-load 'eglot
+    (add-to-list 'eglot-server-programs
+		 '(gn-mode . ("gn-language-server")))))
+
+(use-package fish-mode)
+
+(use-package desktop
+  :config
+  (setq desktop-dirname (to-local-path "desktop"))
+  (add-to-list 'desktop-path desktop-dirname)
+  (setq desktop-base-file-name "autosave")
+  (setq desktop-base-lock-name "autosave-lock")
+  (desktop-save-mode 1))
 
 (load custom-file 'noerror 'nomessage)
 
