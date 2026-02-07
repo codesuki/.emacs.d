@@ -814,6 +814,39 @@ returns non-nil. If all hooks return nil it executes
 	  (yaml "https://github.com/ikatyang/tree-sitter-yaml")))
   (setq treesit-extra-load-path '("~/Development/tree-sitter-module/dist")))
 
+
+(defun codesuki--eglot-disable-tramp-direct-async (orig-fun &rest args)
+  "Temporarily set `tramp-direct-async-process-p` to `ignore` during `eglot--connect`."
+  (if (fboundp 'tramp-direct-async-process-p)
+      ;; Dynamically bind the function to always return nil (ignore)
+      (cl-letf (((symbol-function 'tramp-direct-async-process-p) #'ignore))
+	(apply orig-fun args))
+    ;; Fallback if the tramp function isn't defined
+    (apply orig-fun args)))
+
+(use-package tramp
+  :straight (:type built-in)
+  :config
+  (setq tramp-verbose 0)
+  (setq tramp-use-scp-direct-remote-copying t)
+  (setq vc-handled-backends '(Git))
+  (setq remote-file-name-inhibit-locks t)
+  (connection-local-set-profile-variables
+   'remote-direct-async-process
+   '((tramp-direct-async-process . t)))
+  (connection-local-set-profiles
+   '(:application tramp :protocol "ssh")
+   'remote-direct-async-process)
+  (connection-local-set-profiles
+   '(:application tramp :protocol "scp")
+   'remote-direct-async-process)
+  ;; For connections that have ‘tramp-direct-async-process’ enabled, staging
+  ;; hunks hangs, unless this variable is set to ‘pty’ (see #5220).
+  (setq magit-tramp-pipe-stty-settings 'pty)
+  ;; For Eglot
+  ;;(add-to-list 'tramp-remote-path 'tramp-own-remote-path)
+  (eval-after-load 'eglot (advice-add 'eglot--connect :around #'codesuki--eglot-disable-tramp-direct-async)))
+
 ;; Nicer display of function/macro/variable description. Actually shows the code
 ;; and callers.
 (use-package helpful
